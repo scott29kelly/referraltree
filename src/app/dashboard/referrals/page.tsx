@@ -109,7 +109,7 @@ export default function ReferralsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
           <p className="text-sm text-slate-400">Submitted</p>
           <p className="text-2xl font-bold text-slate-300">
@@ -132,6 +132,12 @@ export default function ReferralsPage() {
           <p className="text-sm text-slate-400">Sold</p>
           <p className="text-2xl font-bold text-emerald-400">
             {referrals.filter((r) => r.status === 'sold').length}
+          </p>
+        </div>
+        <div className="p-4 rounded-xl bg-guardian-gold/10 border border-guardian-gold/20">
+          <p className="text-sm text-slate-400">Total Earnings</p>
+          <p className="text-2xl font-bold text-guardian-gold">
+            ${(referrals.filter((r) => r.status === 'sold').length * 250).toLocaleString()}
           </p>
         </div>
       </div>
