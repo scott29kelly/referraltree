@@ -59,15 +59,27 @@ export default function ReferralsPage() {
   }, [rep, loadData]);
 
   const handleStatusChange = async (id: string, status: ReferralStatus) => {
+    // Optimistically update UI
+    setReferrals((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, status } : r))
+    );
+
     try {
-      const updated = await updateReferralStatus(id, status);
-      if (updated) {
-        setReferrals((prev) =>
-          prev.map((r) => (r.id === id ? { ...r, status } : r))
-        );
+      // Try API first (for demo referrals stored in JSON)
+      const apiResponse = await fetch('/api/referrals', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      });
+
+      if (!apiResponse.ok) {
+        // If not in API, try mock data update
+        await updateReferralStatus(id, status);
       }
     } catch (error) {
       console.error('Error updating status:', error);
+      // Revert on error
+      loadData();
     }
   };
 

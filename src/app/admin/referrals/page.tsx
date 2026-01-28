@@ -196,20 +196,52 @@ export default function AdminReferralsPage() {
   };
 
   const handleBulkStatusChange = async (status: ReferralStatus) => {
-    for (const id of selectedIds) {
-      await updateReferralStatus(id, status);
-    }
+    // Optimistically update UI
     setReferrals((prev) =>
       prev.map((r) => (selectedIds.has(r.id) ? { ...r, status } : r))
     );
+    
+    // Update each referral via API
+    for (const id of selectedIds) {
+      try {
+        const apiResponse = await fetch('/api/referrals', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, status }),
+        });
+        if (!apiResponse.ok) {
+          await updateReferralStatus(id, status);
+        }
+      } catch {
+        await updateReferralStatus(id, status);
+      }
+    }
     setSelectedIds(new Set());
   };
 
   const handleStatusChange = async (id: string, status: ReferralStatus) => {
-    await updateReferralStatus(id, status);
+    // Optimistically update UI
     setReferrals((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status } : r))
     );
+
+    try {
+      // Try API first (for demo referrals stored in JSON)
+      const apiResponse = await fetch('/api/referrals', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      });
+
+      if (!apiResponse.ok) {
+        // If not in API, try mock data update
+        await updateReferralStatus(id, status);
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      // Revert on error
+      loadData();
+    }
   };
 
   const SortIcon = ({ field }: { field: SortField }) => {
