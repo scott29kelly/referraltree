@@ -220,9 +220,14 @@ export default function TreePage() {
             <Link href="/dashboard" className="p-3 rounded-xl bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all border border-slate-700/50">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-1">My Referral Network</h1>
-              <p className="text-slate-400">Track your complete referral hierarchy</p>
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-guardian-gold/30 to-guardian-gold/10 border border-guardian-gold/30 flex items-center justify-center">
+                <Shield className="w-7 h-7 text-guardian-gold" />
+              </div>
+              <div>
+                <p className="text-sm text-guardian-gold font-medium">{rep?.name}'s Network</p>
+                <h1 className="text-2xl font-bold text-white">Referral Tree</h1>
+              </div>
             </div>
           </div>
           
@@ -279,7 +284,10 @@ export default function TreePage() {
       {/* Tree Container */}
       <div className="rounded-3xl bg-gradient-to-br from-slate-900/80 to-slate-950/80 border border-slate-700/50 backdrop-blur-sm p-8">
         <div className="max-w-4xl mx-auto space-y-4">
-          <TreeNodeCard node={tree} expanded={expandedNodes} onToggle={toggleNode} depth={0} />
+          {/* Start directly with customers, skip the rep node */}
+          {tree.children.map(customerNode => (
+            <TreeNodeCard key={customerNode.id} node={customerNode} expanded={expandedNodes} onToggle={toggleNode} depth={0} />
+          ))}
         </div>
       </div>
 
