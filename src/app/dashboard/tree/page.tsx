@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { getCustomersByRep, getReferralsByRep } from '@/lib/data';
 import {
@@ -11,12 +11,12 @@ import {
   CheckCircle,
   Network,
   ArrowLeft,
+  ChevronDown,
   ChevronRight,
   User,
   Phone,
-  Mail,
   Calendar,
-  ArrowRight,
+  Shield,
 } from 'lucide-react';
 import Link from 'next/link';
 import { clsx } from 'clsx';
@@ -24,11 +24,11 @@ import type { Customer, Referral, ReferralStatus } from '@/types/database';
 
 const REFERRAL_BONUS = 250;
 
-const statusConfig: Record<ReferralStatus, { bg: string; border: string; text: string; label: string; dot: string }> = {
-  submitted: { bg: 'bg-slate-800', border: 'border-slate-600', text: 'text-slate-300', label: 'Submitted', dot: 'bg-slate-500' },
-  contacted: { bg: 'bg-sky-900/50', border: 'border-sky-500', text: 'text-sky-300', label: 'Contacted', dot: 'bg-sky-500' },
-  quoted: { bg: 'bg-amber-900/50', border: 'border-amber-500', text: 'text-amber-300', label: 'Quoted', dot: 'bg-amber-500' },
-  sold: { bg: 'bg-emerald-900/50', border: 'border-emerald-500', text: 'text-emerald-300', label: 'Closed', dot: 'bg-emerald-500' },
+const statusConfig: Record<ReferralStatus, { bg: string; border: string; text: string; label: string; dot: string; line: string }> = {
+  submitted: { bg: 'bg-slate-800', border: 'border-slate-500', text: 'text-slate-300', label: 'Submitted', dot: 'bg-slate-500', line: '#64748b' },
+  contacted: { bg: 'bg-sky-900/50', border: 'border-sky-500', text: 'text-sky-300', label: 'Contacted', dot: 'bg-sky-500', line: '#0ea5e9' },
+  quoted: { bg: 'bg-amber-900/50', border: 'border-amber-500', text: 'text-amber-300', label: 'Quoted', dot: 'bg-amber-500', line: '#f59e0b' },
+  sold: { bg: 'bg-emerald-900/50', border: 'border-emerald-500', text: 'text-emerald-300', label: 'Closed', dot: 'bg-emerald-500', line: '#10b981' },
 };
 
 export default function TreePage() {
@@ -36,7 +36,7 @@ export default function TreePage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function loadData() {
@@ -48,7 +48,6 @@ export default function TreePage() {
           getReferralsByRep(rep.id),
         ]);
 
-        // Also fetch API referrals
         let apiReferrals: Referral[] = [];
         try {
           const response = await fetch('/api/referrals');
@@ -71,11 +70,8 @@ export default function TreePage() {
 
         setCustomers(customersData);
         setReferrals(combinedReferrals);
-        
-        // Auto-select first customer
-        if (customersData.length > 0) {
-          setSelectedCustomerId(customersData[0].id);
-        }
+        // Expand all by default
+        setExpandedCustomers(new Set(customersData.map(c => c.id)));
       } catch (error) {
         console.error('Error loading tree data:', error);
       } finally {
@@ -88,36 +84,37 @@ export default function TreePage() {
     }
   }, [rep]);
 
+  const toggleCustomer = (customerId: string) => {
+    setExpandedCustomers(prev => {
+      const next = new Set(prev);
+      if (next.has(customerId)) {
+        next.delete(customerId);
+      } else {
+        next.add(customerId);
+      }
+      return next;
+    });
+  };
+
   // Stats
   const stats = useMemo(() => {
     const soldCount = referrals.filter((r) => r.status === 'sold').length;
-    const totalEarnings = soldCount * REFERRAL_BONUS;
-    const pendingCount = referrals.filter((r) => r.status !== 'sold').length;
-
     return {
       totalCustomers: customers.length,
       totalReferrals: referrals.length,
       soldCount,
-      totalEarnings,
-      potentialEarnings: pendingCount * REFERRAL_BONUS,
+      totalEarnings: soldCount * REFERRAL_BONUS,
+      potentialEarnings: (referrals.length - soldCount) * REFERRAL_BONUS,
     };
   }, [customers, referrals]);
 
-  // Get referrals for selected customer
-  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
-  const selectedReferrals = referrals.filter(r => r.referrer_id === selectedCustomerId);
-
-  // Get referral counts per customer
-  const referralCounts = useMemo(() => {
-    const counts: Record<string, { total: number; sold: number }> = {};
+  // Group referrals by customer
+  const referralsByCustomer = useMemo(() => {
+    const map: Record<string, Referral[]> = {};
     customers.forEach(c => {
-      const custReferrals = referrals.filter(r => r.referrer_id === c.id);
-      counts[c.id] = {
-        total: custReferrals.length,
-        sold: custReferrals.filter(r => r.status === 'sold').length,
-      };
+      map[c.id] = referrals.filter(r => r.referrer_id === c.id);
     });
-    return counts;
+    return map;
   }, [customers, referrals]);
 
   if (authLoading || loading) {
@@ -164,7 +161,7 @@ export default function TreePage() {
           <div>
             <h1 className="text-2xl font-bold text-white">My Referral Network</h1>
             <p className="text-sm text-slate-400">
-              Select a customer to view their referrals
+              Visual map of your customers and their referrals
             </p>
           </div>
         </div>
@@ -186,210 +183,186 @@ export default function TreePage() {
         <StatCard icon={TrendingUp} value={`$${stats.potentialEarnings}`} label="Pending" color="amber" />
       </div>
 
-      {/* Split View */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Customer List */}
-        <div className="lg:col-span-1">
-          <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 overflow-hidden">
-            <div className="p-4 border-b border-slate-700/50">
-              <h2 className="font-semibold text-white">Customers</h2>
-              <p className="text-xs text-slate-500">{customers.length} total</p>
+      {/* Network Tree */}
+      <div className="rounded-2xl bg-slate-900/50 border border-slate-700/50 p-6 overflow-x-auto">
+        {/* Rep Node (Root) */}
+        <div className="flex flex-col items-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative px-6 py-4 rounded-2xl bg-gradient-to-br from-guardian-gold/30 to-guardian-gold/10 border-2 border-guardian-gold shadow-lg shadow-guardian-gold/20"
+          >
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-guardian-gold text-guardian-navy text-[10px] font-bold rounded-full uppercase tracking-wider">
+              Sales Rep
             </div>
-            <div className="divide-y divide-slate-700/30 max-h-[500px] overflow-y-auto">
-              {customers.map((customer) => {
-                const counts = referralCounts[customer.id];
-                const isSelected = customer.id === selectedCustomerId;
-                
-                return (
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-guardian-gold/30 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-guardian-gold" />
+              </div>
+              <div>
+                <p className="font-bold text-white text-lg">{rep?.name}</p>
+                <p className="text-sm text-slate-400">{stats.totalCustomers} customers</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Connector line from Rep to Customers */}
+          <div className="w-0.5 h-8 bg-gradient-to-b from-guardian-gold to-slate-600" />
+
+          {/* Customers Row */}
+          <div className="flex items-start gap-8 flex-wrap justify-center">
+            {customers.map((customer, customerIndex) => {
+              const customerReferrals = referralsByCustomer[customer.id] || [];
+              const isExpanded = expandedCustomers.has(customer.id);
+              const soldCount = customerReferrals.filter(r => r.status === 'sold').length;
+
+              return (
+                <motion.div
+                  key={customer.id}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: customerIndex * 0.1 }}
+                  className="flex flex-col items-center"
+                >
+                  {/* Horizontal connector to customer */}
+                  <div className="w-0.5 h-4 bg-slate-600" />
+
+                  {/* Customer Node */}
                   <button
-                    key={customer.id}
-                    onClick={() => setSelectedCustomerId(customer.id)}
+                    onClick={() => toggleCustomer(customer.id)}
                     className={clsx(
-                      'w-full p-4 text-left transition-all',
-                      isSelected
-                        ? 'bg-guardian-gold/10 border-l-4 border-guardian-gold'
-                        : 'hover:bg-slate-700/30 border-l-4 border-transparent'
+                      'relative px-5 py-4 rounded-xl border-2 transition-all hover:scale-105',
+                      'bg-gradient-to-br from-sky-900/50 to-sky-950/50 border-sky-500/50',
+                      'shadow-lg shadow-sky-500/10 hover:shadow-sky-500/20',
+                      'min-w-[200px]'
                     )}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={clsx(
-                          'w-10 h-10 rounded-xl flex items-center justify-center',
-                          isSelected 
-                            ? 'bg-guardian-gold/20 text-guardian-gold' 
-                            : 'bg-slate-700 text-slate-400'
-                        )}>
-                          <User className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className={clsx(
-                            'font-medium',
-                            isSelected ? 'text-guardian-gold' : 'text-white'
-                          )}>
-                            {customer.name}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {counts.total} referral{counts.total !== 1 ? 's' : ''} • {counts.sold} closed
-                          </p>
-                        </div>
+                    <div className="absolute -top-2.5 left-3 px-2 py-0.5 bg-sky-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider">
+                      Customer
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-sky-500/30 flex items-center justify-center">
+                        <User className="w-5 h-5 text-sky-400" />
                       </div>
-                      <ChevronRight className={clsx(
-                        'w-5 h-5 transition-transform',
-                        isSelected ? 'text-guardian-gold rotate-90' : 'text-slate-500'
-                      )} />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Referrals Panel */}
-        <div className="lg:col-span-2">
-          <AnimatePresence mode="wait">
-            {selectedCustomer ? (
-              <motion.div
-                key={selectedCustomerId}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                className="rounded-2xl bg-slate-800/50 border border-slate-700/50 overflow-hidden"
-              >
-                {/* Selected Customer Header */}
-                <div className="p-5 border-b border-slate-700/50 bg-gradient-to-r from-guardian-gold/10 to-transparent">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-guardian-gold/20 flex items-center justify-center">
-                      <User className="w-7 h-7 text-guardian-gold" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-guardian-gold font-medium uppercase tracking-wider">Customer</p>
-                      <h3 className="text-xl font-bold text-white">{selectedCustomer.name}</h3>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-slate-400">
-                        {selectedCustomer.phone && (
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-3.5 h-3.5" />
-                            {selectedCustomer.phone}
-                          </span>
-                        )}
-                        {selectedCustomer.email && (
-                          <span className="flex items-center gap-1">
-                            <Mail className="w-3.5 h-3.5" />
-                            {selectedCustomer.email}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-emerald-400">
-                        ${(referralCounts[selectedCustomer.id]?.sold || 0) * REFERRAL_BONUS}
-                      </p>
-                      <p className="text-xs text-slate-500">earned from referrals</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Visual Flow */}
-                <div className="p-5 border-b border-slate-700/50 bg-slate-900/30">
-                  <div className="flex items-center justify-center gap-4">
-                    <div className="px-4 py-2 rounded-xl bg-guardian-gold/20 border border-guardian-gold/30">
-                      <p className="text-sm font-medium text-guardian-gold">{selectedCustomer.name}</p>
-                    </div>
-                    <ArrowRight className="w-6 h-6 text-slate-500" />
-                    <div className="flex items-center gap-2">
-                      <div className="px-4 py-2 rounded-xl bg-slate-700/50 border border-slate-600">
-                        <p className="text-sm font-medium text-white">{selectedReferrals.length} Referrals</p>
-                      </div>
-                      <ArrowRight className="w-6 h-6 text-slate-500" />
-                      <div className="px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
-                        <p className="text-sm font-medium text-emerald-400">
-                          {referralCounts[selectedCustomer.id]?.sold || 0} Closed
+                      <div className="text-left flex-1">
+                        <p className="font-semibold text-white">{customer.name}</p>
+                        <p className="text-xs text-slate-400">
+                          {customerReferrals.length} referral{customerReferrals.length !== 1 ? 's' : ''} • {soldCount} closed
                         </p>
                       </div>
+                      {customerReferrals.length > 0 && (
+                        isExpanded ? (
+                          <ChevronDown className="w-5 h-5 text-sky-400" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5 text-slate-500" />
+                        )
+                      )}
                     </div>
-                  </div>
-                </div>
+                    {soldCount > 0 && (
+                      <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-full">
+                        ${soldCount * REFERRAL_BONUS}
+                      </div>
+                    )}
+                  </button>
 
-                {/* Referrals List */}
-                <div className="p-5">
-                  <h4 className="text-sm font-medium text-slate-400 mb-4">
-                    Referrals from {selectedCustomer.name}
-                  </h4>
-                  
-                  {selectedReferrals.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Network className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                      <p className="text-slate-400">No referrals yet</p>
-                      <p className="text-sm text-slate-500">Share your QR code with this customer</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {selectedReferrals.map((referral, index) => {
-                        const config = statusConfig[referral.status];
-                        return (
-                          <motion.div
-                            key={referral.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className={clsx(
-                              'p-4 rounded-xl border-2 transition-all hover:scale-[1.02]',
-                              config.bg,
-                              config.border
-                            )}
-                          >
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-slate-700/50 flex items-center justify-center">
-                                  <User className="w-5 h-5 text-slate-400" />
+                  {/* Referrals under this customer */}
+                  {isExpanded && customerReferrals.length > 0 && (
+                    <div className="flex flex-col items-center">
+                      {/* Vertical connector */}
+                      <div className="w-0.5 h-6 bg-slate-600" />
+                      
+                      {/* Horizontal branch line */}
+                      {customerReferrals.length > 1 && (
+                        <div 
+                          className="h-0.5 bg-slate-600" 
+                          style={{ 
+                            width: `${Math.min(customerReferrals.length * 180, 600)}px` 
+                          }} 
+                        />
+                      )}
+
+                      {/* Referral nodes */}
+                      <div className="flex items-start gap-4 flex-wrap justify-center mt-2">
+                        {customerReferrals.map((referral, refIndex) => {
+                          const config = statusConfig[referral.status];
+                          return (
+                            <motion.div
+                              key={referral.id}
+                              initial={{ y: 10, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: refIndex * 0.05 }}
+                              className="flex flex-col items-center"
+                            >
+                              {/* Connector to referral */}
+                              {customerReferrals.length > 1 && (
+                                <div className="w-0.5 h-3" style={{ backgroundColor: config.line }} />
+                              )}
+                              
+                              {/* Referral Node */}
+                              <div
+                                className={clsx(
+                                  'relative px-4 py-3 rounded-xl border-2 min-w-[160px]',
+                                  config.bg,
+                                  config.border,
+                                  'shadow-md transition-all hover:scale-105'
+                                )}
+                              >
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="w-8 h-8 rounded-lg bg-slate-700/50 flex items-center justify-center">
+                                    <User className="w-4 h-4 text-slate-400" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-white text-sm truncate">{referral.referee_name}</p>
+                                    {referral.referee_phone && (
+                                      <p className="text-[10px] text-slate-500 truncate">{referral.referee_phone}</p>
+                                    )}
+                                  </div>
                                 </div>
-                                <div>
-                                  <p className="font-semibold text-white">{referral.referee_name}</p>
-                                  {referral.referee_phone && (
-                                    <p className="text-xs text-slate-500">{referral.referee_phone}</p>
+                                
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5">
+                                    <div className={clsx('w-2 h-2 rounded-full', config.dot)} />
+                                    <span className={clsx('text-xs font-medium', config.text)}>
+                                      {config.label}
+                                    </span>
+                                  </div>
+                                  {referral.status === 'sold' && (
+                                    <span className="text-emerald-400 font-bold text-sm">$250</span>
                                   )}
                                 </div>
+                                
+                                <div className="mt-1.5 flex items-center gap-1 text-[10px] text-slate-500">
+                                  <Calendar className="w-3 h-3" />
+                                  {new Date(referral.created_at).toLocaleDateString()}
+                                </div>
                               </div>
-                              {referral.status === 'sold' && (
-                                <span className="text-emerald-400 font-bold">$250</span>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className={clsx('w-2 h-2 rounded-full', config.dot)} />
-                                <span className={clsx('text-sm font-medium', config.text)}>
-                                  {config.label}
-                                </span>
-                              </div>
-                              <span className="text-xs text-slate-500 flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {new Date(referral.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
+                            </motion.div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
-                </div>
-              </motion.div>
-            ) : (
-              <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 p-12 text-center">
-                <Network className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                <p className="text-slate-400">Select a customer to view their referrals</p>
-              </div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-6">
+      <div className="flex items-center justify-center gap-6 flex-wrap">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-md bg-guardian-gold/30 border border-guardian-gold" />
+          <span className="text-sm text-slate-400">Sales Rep</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-md bg-sky-900/50 border border-sky-500" />
+          <span className="text-sm text-slate-400">Customer</span>
+        </div>
+        <div className="w-px h-4 bg-slate-700" />
         {(Object.keys(statusConfig) as ReferralStatus[]).map((status) => (
-          <div key={status} className="flex items-center gap-2">
-            <div className={clsx('w-3 h-3 rounded-full', statusConfig[status].dot)} />
+          <div key={status} className="flex items-center gap-1.5">
+            <div className={clsx('w-2.5 h-2.5 rounded-full', statusConfig[status].dot)} />
             <span className="text-sm text-slate-400">{statusConfig[status].label}</span>
           </div>
         ))}
