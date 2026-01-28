@@ -24,6 +24,7 @@ export default function ReferralSubmissionPage() {
   const [email, setEmail] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [submittedReferrerName, setSubmittedReferrerName] = useState('');
 
   useEffect(() => {
     async function loadData() {
@@ -85,6 +86,9 @@ export default function ReferralSubmissionPage() {
         throw new Error(data.error || 'Failed to submit referral');
       }
 
+      // Save the referrer name for the success page
+      const referrer = customers.find(c => c.id === referrerId);
+      setSubmittedReferrerName(referrer?.name || rep?.name || 'a friend');
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit referral');
@@ -126,7 +130,7 @@ export default function ReferralSubmissionPage() {
           </p>
           <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
             <p className="text-sm text-slate-300">
-              Referred by <span className="font-semibold text-white">{rep.name}</span>
+              Referred by <span className="font-semibold text-white">{submittedReferrerName}</span>
             </p>
           </div>
         </div>
