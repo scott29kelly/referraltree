@@ -24,11 +24,11 @@ import type { Customer, Referral, ReferralStatus } from '@/types/database';
 
 const REFERRAL_BONUS = 250;
 
-const statusConfig: Record<ReferralStatus, { bg: string; border: string; text: string; label: string; line: string }> = {
-  submitted: { bg: 'bg-slate-800/80', border: 'border-slate-500', text: 'text-slate-300', label: 'Submitted', line: 'border-slate-500' },
-  contacted: { bg: 'bg-sky-900/60', border: 'border-sky-500', text: 'text-sky-300', label: 'Contacted', line: 'border-sky-500' },
-  quoted: { bg: 'bg-amber-900/60', border: 'border-amber-500', text: 'text-amber-300', label: 'Quoted', line: 'border-amber-500' },
-  sold: { bg: 'bg-emerald-900/60', border: 'border-emerald-500', text: 'text-emerald-300', label: 'Closed', line: 'border-emerald-500' },
+const statusConfig: Record<ReferralStatus, { bg: string; border: string; text: string; label: string; glow: string }> = {
+  submitted: { bg: 'bg-slate-800', border: 'border-slate-500', text: 'text-slate-300', label: 'Submitted', glow: '' },
+  contacted: { bg: 'bg-sky-950', border: 'border-sky-400', text: 'text-sky-300', label: 'Contacted', glow: 'shadow-sky-500/20' },
+  quoted: { bg: 'bg-amber-950', border: 'border-amber-400', text: 'text-amber-300', label: 'Quoted', glow: 'shadow-amber-500/20' },
+  sold: { bg: 'bg-emerald-950', border: 'border-emerald-400', text: 'text-emerald-300', label: 'Closed', glow: 'shadow-emerald-500/20' },
 };
 
 export default function TreePage() {
@@ -70,7 +70,6 @@ export default function TreePage() {
 
         setCustomers(customersData);
         setReferrals(combinedReferrals);
-        // Start with all expanded
         setExpandedCustomers(new Set(customersData.map(c => c.id)));
       } catch (error) {
         console.error('Error loading tree data:', error);
@@ -96,7 +95,6 @@ export default function TreePage() {
     });
   };
 
-  // Group referrals by customer
   const referralsByCustomer = useMemo(() => {
     const map: Record<string, Referral[]> = {};
     customers.forEach(c => {
@@ -105,7 +103,6 @@ export default function TreePage() {
     return map;
   }, [customers, referrals]);
 
-  // Stats
   const stats = useMemo(() => {
     const soldCount = referrals.filter((r) => r.status === 'sold').length;
     return {
@@ -152,15 +149,12 @@ export default function TreePage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard"
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
-          >
+          <Link href="/dashboard" className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-white">My Referral Network</h1>
-            <p className="text-sm text-slate-400">Visual map showing who referred who</p>
+            <p className="text-sm text-slate-400">Click customers to expand/collapse</p>
           </div>
         </div>
         
@@ -179,193 +173,255 @@ export default function TreePage() {
         <StatCard icon={TrendingUp} value={`$${stats.potentialEarnings}`} label="Pending" color="amber" />
       </div>
 
-      {/* Tree Visualization */}
-      <div className="rounded-2xl bg-slate-900/50 border border-slate-700/50 p-6 overflow-x-auto">
-        <div className="tree-container min-w-fit">
-          {/* Rep Node (Root) */}
-          <div className="flex flex-col items-center">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="relative px-6 py-4 rounded-2xl bg-gradient-to-br from-guardian-gold/30 to-guardian-gold/10 border-2 border-guardian-gold shadow-lg shadow-guardian-gold/20"
-            >
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-guardian-gold text-guardian-navy text-[10px] font-bold rounded-full uppercase tracking-wider whitespace-nowrap">
-                Sales Rep
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-guardian-gold/30 flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-guardian-gold" />
+      {/* Org Chart Tree */}
+      <div className="rounded-2xl bg-slate-900/50 border border-slate-700/50 p-8 overflow-x-auto">
+        <div className="org-tree">
+          {/* Sales Rep - Root */}
+          <ul className="flex justify-center">
+            <li className="relative flex flex-col items-center">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="node-card rep-node"
+              >
+                <div className="node-badge gold">Sales Rep</div>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-guardian-gold/30 flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-guardian-gold" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-white text-lg">{rep?.name}</p>
+                    <p className="text-sm text-slate-400">{customers.length} customers</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-white text-lg">{rep?.name}</p>
-                  <p className="text-sm text-slate-400">{customers.length} customers</p>
-                </div>
-              </div>
-            </motion.div>
+              </motion.div>
 
-            {/* Vertical line from rep */}
-            <div className="w-0.5 h-8 bg-gradient-to-b from-guardian-gold to-sky-500" />
+              {/* Customers */}
+              {customers.length > 0 && (
+                <ul className="flex gap-6 pt-8 relative before:absolute before:top-0 before:left-1/2 before:-translate-x-1/2 before:w-px before:h-8 before:bg-sky-500">
+                  {/* Horizontal connector line */}
+                  {customers.length > 1 && (
+                    <div className="absolute top-8 left-0 right-0 h-px bg-sky-500" style={{ left: '25%', right: '25%' }} />
+                  )}
+                  
+                  {customers.map((customer, idx) => {
+                    const custReferrals = referralsByCustomer[customer.id] || [];
+                    const isExpanded = expandedCustomers.has(customer.id);
+                    const soldCount = custReferrals.filter(r => r.status === 'sold').length;
 
-            {/* Horizontal line spanning customers */}
-            {customers.length > 1 && (
-              <div className="w-full max-w-3xl h-0.5 bg-sky-500" />
-            )}
-
-            {/* Customer branches */}
-            <div className="flex justify-center gap-8 flex-wrap">
-              {customers.map((customer, idx) => {
-                const custReferrals = referralsByCustomer[customer.id] || [];
-                const isExpanded = expandedCustomers.has(customer.id);
-                const soldCount = custReferrals.filter(r => r.status === 'sold').length;
-
-                return (
-                  <motion.div
-                    key={customer.id}
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="flex flex-col items-center"
-                  >
-                    {/* Vertical connector to customer */}
-                    <div className="w-0.5 h-6 bg-sky-500" />
-
-                    {/* Customer Node */}
-                    <button
-                      onClick={() => toggleCustomer(customer.id)}
-                      className={clsx(
-                        'relative px-5 py-4 rounded-xl border-2 transition-all hover:scale-105',
-                        'bg-gradient-to-br from-sky-900/80 to-sky-950/80 border-sky-500/60',
-                        'shadow-lg shadow-sky-500/10 hover:shadow-sky-500/20',
-                        'min-w-[200px] text-left'
-                      )}
-                    >
-                      <div className="absolute -top-2.5 left-3 px-2 py-0.5 bg-sky-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider">
-                        Customer
-                      </div>
-                      {soldCount > 0 && (
-                        <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-full">
-                          ${soldCount * REFERRAL_BONUS}
-                        </div>
-                      )}
-                      <div className="flex items-center gap-3 mt-1">
-                        <div className="w-10 h-10 rounded-xl bg-sky-500/30 flex items-center justify-center">
-                          <User className="w-5 h-5 text-sky-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-white">{customer.name}</p>
-                          <p className="text-xs text-slate-400">
-                            {custReferrals.length} referral{custReferrals.length !== 1 ? 's' : ''}
-                          </p>
-                        </div>
-                        {custReferrals.length > 0 && (
-                          isExpanded 
-                            ? <ChevronUp className="w-5 h-5 text-sky-400" />
-                            : <ChevronDown className="w-5 h-5 text-slate-500" />
-                        )}
-                      </div>
-                    </button>
-
-                    {/* Referrals */}
-                    <AnimatePresence>
-                      {isExpanded && custReferrals.length > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="flex flex-col items-center overflow-hidden"
+                    return (
+                      <li key={customer.id} className="relative flex flex-col items-center">
+                        {/* Vertical line down to customer */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-8 -mt-8 bg-sky-500" />
+                        
+                        <motion.button
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: idx * 0.1 }}
+                          onClick={() => toggleCustomer(customer.id)}
+                          className="node-card customer-node"
                         >
-                          {/* Vertical line to referrals */}
-                          <div className="w-0.5 h-6 bg-slate-600" />
-
-                          {/* Horizontal spread line */}
-                          {custReferrals.length > 1 && (
-                            <div 
-                              className="h-0.5 bg-slate-600" 
-                              style={{ width: `${Math.min(custReferrals.length * 170, 500)}px` }}
-                            />
+                          <div className="node-badge blue">Customer</div>
+                          {soldCount > 0 && (
+                            <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-full z-10">
+                              ${soldCount * REFERRAL_BONUS}
+                            </div>
                           )}
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-sky-500/30 flex items-center justify-center">
+                              <User className="w-5 h-5 text-sky-400" />
+                            </div>
+                            <div className="text-left flex-1">
+                              <p className="font-semibold text-white">{customer.name}</p>
+                              <p className="text-xs text-slate-400">{custReferrals.length} referrals</p>
+                            </div>
+                            {custReferrals.length > 0 && (
+                              isExpanded 
+                                ? <ChevronUp className="w-5 h-5 text-sky-400" />
+                                : <ChevronDown className="w-5 h-5 text-slate-500" />
+                            )}
+                          </div>
+                        </motion.button>
 
-                          {/* Referral nodes */}
-                          <div className="flex gap-3 flex-wrap justify-center max-w-xl">
-                            {custReferrals.map((referral, refIdx) => {
-                              const config = statusConfig[referral.status];
-                              return (
-                                <motion.div
-                                  key={referral.id}
-                                  initial={{ y: 10, opacity: 0 }}
-                                  animate={{ y: 0, opacity: 1 }}
-                                  transition={{ delay: refIdx * 0.05 }}
-                                  className="flex flex-col items-center"
-                                >
-                                  {/* Connector */}
-                                  <div className={clsx('w-0.5 h-4', config.line.replace('border-', 'bg-'))} />
-                                  
-                                  {/* Referral card */}
-                                  <div className={clsx(
-                                    'px-4 py-3 rounded-xl border-2 min-w-[160px]',
-                                    config.bg, config.border,
-                                    'shadow-md'
-                                  )}>
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <div className="w-8 h-8 rounded-lg bg-slate-700/50 flex items-center justify-center">
-                                        <User className="w-4 h-4 text-slate-400" />
+                        {/* Referrals */}
+                        <AnimatePresence>
+                          {isExpanded && custReferrals.length > 0 && (
+                            <motion.ul
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="flex flex-wrap gap-4 justify-center pt-8 relative overflow-visible"
+                            >
+                              {/* Vertical line from customer */}
+                              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-8 bg-slate-500" />
+                              
+                              {/* Horizontal connector if multiple */}
+                              {custReferrals.length > 1 && (
+                                <div 
+                                  className="absolute top-8 h-px bg-slate-500" 
+                                  style={{ 
+                                    left: `calc(50% - ${Math.min(custReferrals.length - 1, 2) * 85}px)`,
+                                    right: `calc(50% - ${Math.min(custReferrals.length - 1, 2) * 85}px)`,
+                                  }} 
+                                />
+                              )}
+                              
+                              {custReferrals.map((referral, refIdx) => {
+                                const config = statusConfig[referral.status];
+                                return (
+                                  <motion.li
+                                    key={referral.id}
+                                    initial={{ y: 10, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    transition={{ delay: refIdx * 0.03 }}
+                                    className="relative flex flex-col items-center"
+                                  >
+                                    {/* Vertical connector */}
+                                    <div className={clsx(
+                                      'absolute top-0 left-1/2 -translate-x-1/2 w-px h-8 -mt-8',
+                                      config.border.replace('border-', 'bg-')
+                                    )} />
+                                    
+                                    <div className={clsx(
+                                      'node-card referral-node',
+                                      config.bg,
+                                      config.border,
+                                      config.glow && `shadow-lg ${config.glow}`
+                                    )}>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-8 h-8 rounded-lg bg-slate-700/50 flex items-center justify-center flex-shrink-0">
+                                          <User className="w-4 h-4 text-slate-400" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                          <p className="font-medium text-white text-sm truncate">{referral.referee_name}</p>
+                                          {referral.referee_phone && (
+                                            <p className="text-[10px] text-slate-500 flex items-center gap-1 truncate">
+                                              <Phone className="w-2.5 h-2.5 flex-shrink-0" />
+                                              <span className="truncate">{referral.referee_phone}</span>
+                                            </p>
+                                          )}
+                                        </div>
                                       </div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-white text-sm truncate">{referral.referee_name}</p>
-                                        {referral.referee_phone && (
-                                          <p className="text-[10px] text-slate-500 flex items-center gap-1">
-                                            <Phone className="w-2.5 h-2.5" />
-                                            {referral.referee_phone}
-                                          </p>
+                                      <div className="flex items-center justify-between gap-2">
+                                        <span className={clsx('text-xs font-semibold', config.text)}>
+                                          {config.label}
+                                        </span>
+                                        {referral.status === 'sold' && (
+                                          <span className="text-emerald-400 font-bold text-sm">$250</span>
                                         )}
                                       </div>
+                                      <div className="mt-1.5 text-[10px] text-slate-500 flex items-center gap-1">
+                                        <Calendar className="w-2.5 h-2.5" />
+                                        {new Date(referral.created_at).toLocaleDateString()}
+                                      </div>
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                      <span className={clsx('text-xs font-medium', config.text)}>
-                                        {config.label}
-                                      </span>
-                                      {referral.status === 'sold' && (
-                                        <span className="text-emerald-400 font-bold text-sm">$250</span>
-                                      )}
-                                    </div>
-                                    <div className="mt-1 text-[10px] text-slate-500 flex items-center gap-1">
-                                      <Calendar className="w-2.5 h-2.5" />
-                                      {new Date(referral.created_at).toLocaleDateString()}
-                                    </div>
-                                  </div>
-                                </motion.div>
-                              );
-                            })}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
+                                  </motion.li>
+                                );
+                              })}
+                            </motion.ul>
+                          )}
+                        </AnimatePresence>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+          </ul>
         </div>
       </div>
 
       {/* Legend */}
       <div className="flex items-center justify-center gap-6 flex-wrap text-sm">
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded bg-guardian-gold/30 border-2 border-guardian-gold" />
+        <span className="flex items-center gap-2 text-slate-400">
+          <span className="w-4 h-4 rounded-lg bg-guardian-gold/30 border-2 border-guardian-gold" />
           Sales Rep
         </span>
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded bg-sky-900/50 border-2 border-sky-500" />
+        <span className="flex items-center gap-2 text-slate-400">
+          <span className="w-4 h-4 rounded-lg bg-sky-900/50 border-2 border-sky-500" />
           Customer
         </span>
         <span className="w-px h-4 bg-slate-700" />
         {(Object.keys(statusConfig) as ReferralStatus[]).map((status) => (
           <span key={status} className="flex items-center gap-1.5 text-slate-400">
-            <span className={clsx('w-2.5 h-2.5 rounded-full', statusConfig[status].line.replace('border-', 'bg-'))} />
+            <span className={clsx('w-2.5 h-2.5 rounded-full', statusConfig[status].border.replace('border-', 'bg-'))} />
             {statusConfig[status].label}
           </span>
         ))}
       </div>
+
+      {/* CSS for org chart tree */}
+      <style jsx>{`
+        .org-tree ul {
+          position: relative;
+          padding-top: 0;
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .org-tree li {
+          list-style: none;
+        }
+        
+        .node-card {
+          position: relative;
+          padding: 1rem 1.25rem;
+          border-radius: 1rem;
+          border-width: 2px;
+          transition: all 0.2s;
+          min-width: 200px;
+        }
+        
+        .node-card:hover {
+          transform: translateY(-2px);
+        }
+        
+        .rep-node {
+          background: linear-gradient(to bottom right, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));
+          border-color: rgba(212, 175, 55, 0.8);
+          box-shadow: 0 8px 32px rgba(212, 175, 55, 0.2);
+        }
+        
+        .customer-node {
+          background: linear-gradient(to bottom right, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0.05));
+          border-color: rgba(14, 165, 233, 0.6);
+          box-shadow: 0 4px 24px rgba(14, 165, 233, 0.15);
+          cursor: pointer;
+        }
+        
+        .customer-node:hover {
+          border-color: rgba(14, 165, 233, 0.8);
+          box-shadow: 0 8px 32px rgba(14, 165, 233, 0.25);
+        }
+        
+        .referral-node {
+          min-width: 160px;
+          max-width: 180px;
+        }
+        
+        .node-badge {
+          position: absolute;
+          top: -10px;
+          left: 12px;
+          padding: 2px 10px;
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          border-radius: 9999px;
+        }
+        
+        .node-badge.gold {
+          background: rgb(212, 175, 55);
+          color: rgb(23, 23, 23);
+        }
+        
+        .node-badge.blue {
+          background: rgb(14, 165, 233);
+          color: white;
+        }
+      `}</style>
     </div>
   );
 }
