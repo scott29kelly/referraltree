@@ -23,7 +23,30 @@ export default function AdminHomePage() {
           getActivities(5),
         ]);
 
-        setStats(statsData);
+        // Fetch API referrals to update stats
+        let apiReferralsCount = 0;
+        let apiSubmitted = 0;
+        try {
+          const response = await fetch('/api/referrals');
+          if (response.ok) {
+            const data = await response.json();
+            const apiReferrals = data.referrals || [];
+            apiReferralsCount = apiReferrals.length;
+            apiSubmitted = apiReferrals.filter((r: { status: string }) => r.status === 'submitted').length;
+          }
+        } catch (err) {
+          console.error('Error fetching API referrals:', err);
+        }
+
+        // Update stats with API referrals
+        const updatedStats = {
+          ...statsData,
+          total_referrals: statsData.total_referrals + apiReferralsCount,
+          submitted: statsData.submitted + apiSubmitted,
+          pending_earnings: statsData.pending_earnings + (apiSubmitted * 250),
+        };
+
+        setStats(updatedStats);
         // Sort by earnings and take top 5
         setTopReps(
           repsData

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Calendar, ChevronDown, X } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -120,14 +121,31 @@ export default function DateRangePicker({
   const [showCustom, setShowCustom] = useState(false);
   const [customStart, setCustomStart] = useState(value.start);
   const [customEnd, setCustomEnd] = useState(value.end);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const activePreset = getActivePreset(value);
+
+  // Update dropdown position when opened
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+      });
+    }
+  }, [isOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const clickedInButton = containerRef.current?.contains(target);
+      const clickedInDropdown = dropdownRef.current?.contains(target);
+      if (!clickedInButton && !clickedInDropdown) {
         setIsOpen(false);
         setShowCustom(false);
       }
@@ -171,6 +189,7 @@ export default function DateRangePicker({
     <div ref={containerRef} className={clsx('relative', className)}>
       {/* Trigger Button */}
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
           'flex items-center gap-2 px-4 py-2.5 rounded-xl',
@@ -203,17 +222,19 @@ export default function DateRangePicker({
         </button>
       )}
 
-      {/* Dropdown */}
-      {isOpen && (
+      {/* Dropdown via Portal */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
         <div
+          ref={dropdownRef}
           className={clsx(
-            'absolute top-full left-0 mt-2 z-50',
+            'fixed z-[9999]',
             'min-w-[280px] p-2 rounded-2xl',
-            'bg-slate-900/95 backdrop-blur-xl',
+            'bg-slate-900 backdrop-blur-xl',
             'border border-slate-700/50',
             'shadow-2xl shadow-black/40',
             'animate-[fade-in_0.15s_ease-out]'
           )}
+          style={{ top: dropdownPos.top, left: dropdownPos.left }}
         >
           {!showCustom ? (
             <>
@@ -321,7 +342,8 @@ export default function DateRangePicker({
               </div>
             </>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getDashboardStats, getActivitiesByRep, getReferralsByRep } from '@/lib/data';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ActivityFeed from '@/components/dashboard/ActivityFeed';
-import { Users, Clock, CheckCircle, DollarSign, QrCode, ArrowRight } from 'lucide-react';
+import { Users, Clock, CheckCircle, DollarSign, QrCode, ArrowRight, Network } from 'lucide-react';
 import type { DashboardStats, Activity, Referral } from '@/types/database';
 
 export default function DashboardPage() {
@@ -27,9 +27,36 @@ export default function DashboardPage() {
           getReferralsByRep(rep.id),
         ]);
 
-        setStats(statsData);
+        // Fetch API referrals for this rep's customers
+        let apiReferrals: Referral[] = [];
+        let apiSubmitted = 0;
+        try {
+          const response = await fetch('/api/referrals');
+          if (response.ok) {
+            const data = await response.json();
+            // Note: API referrals are all visible to admin. For rep view, we show all new ones.
+            apiReferrals = data.referrals || [];
+            apiSubmitted = apiReferrals.filter((r: Referral) => r.status === 'submitted').length;
+          }
+        } catch (err) {
+          console.error('Error fetching API referrals:', err);
+        }
+
+        // Update stats with API referrals
+        const updatedStats = {
+          ...statsData,
+          total_referrals: statsData.total_referrals + apiReferrals.length,
+          submitted: statsData.submitted + apiSubmitted,
+          pending_earnings: statsData.pending_earnings + (apiSubmitted * 250),
+        };
+
+        // Combine referrals for recent list
+        const combined = [...apiReferrals, ...referralsData]
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        setStats(updatedStats);
         setActivities(activitiesData);
-        setRecentReferrals(referralsData.slice(0, 5));
+        setRecentReferrals(combined.slice(0, 5));
       } catch (error) {
         console.error('Error loading dashboard data:', error);
       } finally {
@@ -98,7 +125,21 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link
+          href="/dashboard/tree"
+          className="flex items-center gap-4 p-5 rounded-xl bg-gradient-to-br from-emerald-900/30 to-emerald-950/50 border border-emerald-500/20 hover:border-emerald-500/40 transition-all group"
+        >
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+            <Network className="w-6 h-6 text-emerald-400" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-white">My Network</h3>
+            <p className="text-sm text-slate-400">View referral tree</p>
+          </div>
+          <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+        </Link>
+
         <Link
           href="/dashboard/qr"
           className="flex items-center gap-4 p-5 rounded-xl bg-guardian-navy border border-guardian-gold/20 hover:border-guardian-gold/40 transition-all group"

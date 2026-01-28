@@ -29,6 +29,20 @@ function useSupabase(): boolean {
   return isSupabaseConfigured();
 }
 
+// Helper to generate UUID (works in all browser contexts)
+function generateUUID(): string {
+  // Use crypto.randomUUID if available, otherwise fallback
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback UUID v4 generation
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 // ============ REPS ============
 
 export async function getRep(id: string): Promise<Rep | null> {
@@ -85,7 +99,7 @@ export async function createRep(input: CreateRepInput): Promise<Rep | null> {
   }
   // Mock: add to array (in memory only)
   const newRep: Rep = {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     name: input.name,
     email: input.email,
     role: input.role || 'rep',
@@ -220,7 +234,34 @@ export async function getReferrals(): Promise<Referral[]> {
     if (error) return [];
     return data;
   }
-  return [...mockReferrals].sort(
+  
+  // Merge mock data with demo referrals (from JSON file or API)
+  let demoReferrals: Referral[] = [];
+  try {
+    if (typeof window !== 'undefined') {
+      // Client-side: fetch from API
+      const response = await fetch('/api/referrals');
+      if (response.ok) {
+        const data = await response.json();
+        demoReferrals = data.referrals || [];
+      }
+    } else {
+      // Server-side: read JSON file directly
+      const fs = await import('fs');
+      const path = await import('path');
+      const dataFile = path.join(process.cwd(), 'demo-referrals.json');
+      if (fs.existsSync(dataFile)) {
+        const fileData = fs.readFileSync(dataFile, 'utf-8');
+        demoReferrals = JSON.parse(fileData);
+      }
+    }
+  } catch {
+    // Ignore errors, just use mock data
+  }
+  
+  // Combine and sort by date (demo referrals first since they're newer)
+  const allReferrals = [...demoReferrals, ...mockReferrals];
+  return allReferrals.sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 }
@@ -278,7 +319,7 @@ export async function createReferral(input: CreateReferralInput): Promise<Referr
   }
 
   const newReferral: Referral = {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     referrer_id: input.referrer_id,
     referee_name: input.referee_name,
     referee_phone: input.referee_phone || null,

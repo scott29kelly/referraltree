@@ -55,12 +55,32 @@ export default function AdminReferralsPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const [referralsData, customersData, repsData] = await Promise.all([
+      const [mockReferralsData, customersData, repsData] = await Promise.all([
         getReferrals(),
         getCustomers(),
         getReps(),
       ]);
-      setReferrals(referralsData);
+      
+      // Also fetch API-submitted referrals
+      let apiReferrals: Referral[] = [];
+      try {
+        const response = await fetch('/api/referrals');
+        if (response.ok) {
+          const data = await response.json();
+          apiReferrals = data.referrals || [];
+        }
+      } catch (err) {
+        console.error('Error fetching API referrals:', err);
+      }
+      
+      // Combine API referrals (newer) with mock data, avoiding duplicates
+      const apiIds = new Set(apiReferrals.map(r => r.id));
+      const combinedReferrals = [
+        ...apiReferrals,
+        ...mockReferralsData.filter(r => !apiIds.has(r.id))
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      
+      setReferrals(combinedReferrals);
       setCustomers(customersData);
       setReps(repsData);
     } catch (error) {

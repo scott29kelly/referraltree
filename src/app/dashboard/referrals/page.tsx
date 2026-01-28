@@ -16,12 +16,34 @@ export default function ReferralsPage() {
     if (!rep) return;
 
     try {
-      const [referralsData, customersData] = await Promise.all([
+      const [mockReferralsData, customersData] = await Promise.all([
         getReferralsByRep(rep.id),
         getCustomersByRep(rep.id),
       ]);
 
-      setReferrals(referralsData);
+      // Fetch API referrals and filter by rep's customers
+      let apiReferrals: Referral[] = [];
+      try {
+        const response = await fetch('/api/referrals');
+        if (response.ok) {
+          const data = await response.json();
+          const customerIds = new Set(customersData.map(c => c.id));
+          apiReferrals = (data.referrals || []).filter(
+            (r: Referral) => customerIds.has(r.referrer_id)
+          );
+        }
+      } catch (err) {
+        console.error('Error fetching API referrals:', err);
+      }
+
+      // Combine and dedupe
+      const apiIds = new Set(apiReferrals.map(r => r.id));
+      const combined = [
+        ...apiReferrals,
+        ...mockReferralsData.filter(r => !apiIds.has(r.id))
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setReferrals(combined);
       setCustomers(customersData);
     } catch (error) {
       console.error('Error loading referrals:', error);

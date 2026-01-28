@@ -148,15 +148,30 @@ export default function QRCodePage() {
 
           {/* Preview Card */}
           <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Customer Preview
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">
+                Customer Preview
+              </h3>
+              <a
+                href={referralLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-sm text-guardian-gold hover:underline"
+              >
+                Open <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
             <p className="text-sm text-slate-400 mb-4">
               This is what customers will see when they scan your QR code:
             </p>
 
-            {/* Mini Preview */}
-            <div className="rounded-lg bg-slate-900 border border-slate-700 overflow-hidden">
+            {/* Mini Preview - Clickable */}
+            <a
+              href={referralLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-lg bg-slate-900 border border-slate-700 overflow-hidden hover:border-guardian-gold/50 transition-all"
+            >
               <div className="p-4 border-b border-slate-700 bg-guardian-navy">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded bg-guardian-gold/20 flex items-center justify-center">
@@ -173,13 +188,21 @@ export default function QRCodePage() {
                   Submit your information for a free inspection and quote
                 </p>
                 <div className="space-y-2">
-                  <div className="h-8 bg-slate-800 rounded" />
-                  <div className="h-8 bg-slate-800 rounded" />
-                  <div className="h-8 bg-slate-800 rounded" />
-                  <div className="h-10 bg-guardian-gold/30 rounded" />
+                  <div className="h-8 bg-slate-800 rounded flex items-center px-3">
+                    <span className="text-xs text-slate-500">Your Name *</span>
+                  </div>
+                  <div className="h-8 bg-slate-800 rounded flex items-center px-3">
+                    <span className="text-xs text-slate-500">Phone Number</span>
+                  </div>
+                  <div className="h-8 bg-slate-800 rounded flex items-center px-3">
+                    <span className="text-xs text-slate-500">Email Address</span>
+                  </div>
+                  <div className="h-10 bg-guardian-gold rounded flex items-center justify-center">
+                    <span className="text-sm font-semibold text-guardian-navy">Request Free Inspection</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
 
           {/* Instructions */}

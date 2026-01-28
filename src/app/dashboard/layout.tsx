@@ -16,11 +16,13 @@ import {
   ChevronRight,
   User,
   Sparkles,
+  Network,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
 const navItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
+  { href: '/dashboard/tree', label: 'My Network', icon: Network },
   { href: '/dashboard/referrals', label: 'Referrals', icon: Users },
   { href: '/dashboard/earnings', label: 'Earnings', icon: DollarSign },
   { href: '/dashboard/qr', label: 'QR Code', icon: QrCode },
