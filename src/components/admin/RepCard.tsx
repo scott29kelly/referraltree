@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import Link from 'next/link';
 import { User, Mail, Trophy, DollarSign, MoreVertical, Star } from 'lucide-react';
 import type { RepWithStats } from '@/types/database';
 
@@ -57,7 +58,12 @@ export default function RepCard({
             />
           </div>
           <div>
-            <h3 className="font-semibold text-white text-lg tracking-tight">{rep.name}</h3>
+            <Link 
+              href={`/admin/reps/${rep.id}`}
+              className="font-semibold text-white text-lg tracking-tight hover:text-guardian-gold transition-colors"
+            >
+              {rep.name}
+            </Link>
             <div className="flex items-center gap-1.5 text-sm text-slate-400">
               <Mail className="w-3.5 h-3.5" />
               <span className="truncate max-w-[180px]">{rep.email}</span>
