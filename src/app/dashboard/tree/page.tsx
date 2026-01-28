@@ -47,6 +47,9 @@ interface TreeNode {
   status?: ReferralStatus;
   children: TreeNode[];
   earnings: number;
+  referredBy?: string;
+  dateSubmitted?: string;
+  notes?: string | null;
 }
 
 export default function TreePage() {
@@ -112,6 +115,10 @@ export default function TreePage() {
       referralsByReferrer.set(r.referrer_id, existing);
     });
 
+    // Get customer name by ID for "referred by" lookup
+    const customerById = new Map<string, Customer>();
+    customers.forEach(c => customerById.set(c.id, c));
+
     // Recursive function to build referral chain
     function buildReferralNode(referral: Referral, visited: Set<string>): TreeNode {
       const nodeId = `referral-${referral.id}`;
@@ -132,7 +139,8 @@ export default function TreePage() {
         });
       }
 
-      const soldChildren = children.filter(c => c.status === 'sold').length;
+      // Get who referred this person
+      const referrer = customerById.get(referral.referrer_id);
       
       return {
         id: nodeId,
@@ -143,6 +151,9 @@ export default function TreePage() {
         status: referral.status,
         children,
         earnings: (referral.status === 'sold' ? REFERRAL_BONUS : 0) + children.reduce((sum, c) => sum + c.earnings, 0),
+        referredBy: referrer?.name,
+        dateSubmitted: referral.created_at,
+        notes: referral.notes,
       };
     }
 
@@ -305,70 +316,91 @@ function TreeNodeComponent({
       <button
         onClick={() => hasChildren && onToggle(node.id)}
         className={clsx(
-          'flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left',
-          hasChildren && 'cursor-pointer hover:scale-[1.02]',
+          'flex items-start gap-3 px-3 py-2.5 rounded-lg border-2 transition-all text-left max-w-md',
+          hasChildren && 'cursor-pointer hover:border-opacity-100',
           !hasChildren && 'cursor-default',
           node.type === 'rep' && 'bg-gradient-to-r from-guardian-gold/20 to-guardian-gold/5 border-guardian-gold',
           node.type === 'customer' && !node.status && 'bg-sky-900/50 border-sky-500/50',
           node.type === 'customer' && node.status && statusColors[node.status].bg + ' ' + statusColors[node.status].border,
           node.type === 'referral' && node.status && statusColors[node.status].bg + ' ' + statusColors[node.status].border,
         )}
-        style={{ marginLeft: depth * 24 }}
+        style={{ marginLeft: depth * 20 }}
       >
+        {/* Expand icon */}
+        {hasChildren ? (
+          <div className="flex-shrink-0 mt-0.5">
+            {isExpanded ? (
+              <ChevronDown className="w-4 h-4 text-slate-400" />
+            ) : (
+              <ChevronRight className="w-4 h-4 text-slate-400" />
+            )}
+          </div>
+        ) : (
+          <div className="w-4 flex-shrink-0" />
+        )}
+
         {/* Icon */}
         <div className={clsx(
-          'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
+          'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
           node.type === 'rep' && 'bg-guardian-gold/30',
           node.type === 'customer' && 'bg-sky-500/20',
           node.type === 'referral' && 'bg-slate-700/50',
         )}>
-          {node.type === 'rep' && <Shield className="w-5 h-5 text-guardian-gold" />}
-          {node.type === 'customer' && <User className="w-5 h-5 text-sky-400" />}
-          {node.type === 'referral' && <UserPlus className="w-5 h-5 text-slate-400" />}
+          {node.type === 'rep' && <Shield className="w-4 h-4 text-guardian-gold" />}
+          {node.type === 'customer' && <User className="w-4 h-4 text-sky-400" />}
+          {node.type === 'referral' && <UserPlus className="w-4 h-4 text-slate-400" />}
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className={clsx(
-              'text-[10px] font-bold uppercase px-2 py-0.5 rounded',
+              'text-[9px] font-bold uppercase px-1.5 py-0.5 rounded',
               node.type === 'rep' && 'bg-guardian-gold text-guardian-navy',
               node.type === 'customer' && !node.status && 'bg-sky-500 text-white',
               node.type === 'customer' && node.status && 'bg-emerald-500 text-white',
               node.type === 'referral' && 'bg-slate-600 text-slate-200',
             )}>
-              {node.type === 'rep' ? 'Sales Rep' : node.type === 'customer' && node.status ? 'Converted' : node.type}
+              {node.type === 'rep' ? 'Rep' : node.type === 'customer' && node.status ? 'Converted' : node.type}
             </span>
             {node.status && (
-              <span className={clsx('text-[10px] font-medium', statusColors[node.status].text)}>
-                • {statusLabels[node.status]}
+              <span className={clsx('text-[9px] font-medium', statusColors[node.status].text)}>
+                {statusLabels[node.status]}
               </span>
             )}
-          </div>
-          <p className="font-semibold text-white truncate">{node.name}</p>
-          {node.phone && <p className="text-xs text-slate-500">{node.phone}</p>}
-        </div>
-
-        {/* Stats */}
-        <div className="text-right flex-shrink-0">
-          {node.earnings > 0 && (
-            <p className="text-emerald-400 font-bold">${node.earnings}</p>
-          )}
-          {hasChildren && (
-            <p className="text-xs text-slate-500">{node.children.length} referral{node.children.length !== 1 ? 's' : ''}</p>
-          )}
-        </div>
-
-        {/* Expand icon */}
-        {hasChildren && (
-          <div className="flex-shrink-0">
-            {isExpanded ? (
-              <ChevronDown className="w-5 h-5 text-slate-400" />
-            ) : (
-              <ChevronRight className="w-5 h-5 text-slate-400" />
+            {node.earnings > 0 && (
+              <span className="text-[10px] font-bold text-emerald-400">${node.earnings}</span>
             )}
           </div>
-        )}
+          
+          <p className="font-semibold text-white text-sm leading-tight">{node.name}</p>
+          
+          {/* Details row */}
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[10px] text-slate-500">
+            {node.phone && (
+              <span>📞 {node.phone}</span>
+            )}
+            {node.email && (
+              <span>✉️ {node.email}</span>
+            )}
+            {node.dateSubmitted && (
+              <span>📅 {new Date(node.dateSubmitted).toLocaleDateString()}</span>
+            )}
+            {node.referredBy && (
+              <span className="text-sky-400">👤 Referred by {node.referredBy}</span>
+            )}
+          </div>
+          
+          {node.notes && (
+            <p className="text-[10px] text-slate-400 mt-1 italic truncate">"{node.notes}"</p>
+          )}
+          
+          {hasChildren && (
+            <p className="text-[10px] text-slate-500 mt-1">
+              {node.children.length} referral{node.children.length !== 1 ? 's' : ''} below
+            </p>
+          )}
+        </div>
       </button>
 
       {/* Children */}
@@ -378,7 +410,7 @@ function TreeNodeComponent({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-2 space-y-2 border-l-2 border-slate-700 ml-5"
+            className="mt-1 space-y-1 border-l-2 border-slate-700/50 ml-3"
           >
             {node.children.map(child => (
               <TreeNodeComponent
