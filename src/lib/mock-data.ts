@@ -15,8 +15,13 @@ const REP_CARLOS_ID = 'a7b8c9d0-e1f2-3456-0123-567890123457';
 
 // Customer UUIDs
 const CUSTOMER_IDS = [
-  'd4e5f6a7-b8c9-0123-def0-234567890123', // John Smith
-  'e5f6a7b8-c9d0-1234-ef01-345678901234', // Maria Garcia
+  'd4e5f6a7-b8c9-0123-def0-234567890123', // John Smith (seed customer)
+  'e5f6a7b8-c9d0-1234-ef01-345678901234', // Maria Garcia (seed customer)
+  // Customers who were originally referrals (for deep chains):
+  'mark-thompson-0001-0001-000000000001', // Mark Thompson - referred by John Smith, became customer
+  'nancy-white-0002-0002-000000000002',   // Nancy White - referred by Maria Garcia, became customer  
+  'tom-anderson-0003-0003-000000000003',  // Tom Anderson - referred by John Smith, became customer
+  'kevin-lee-0004-0004-000000000004',     // Kevin Lee - referred by Mark Thompson (2nd gen), became customer
   'f6a7b8c9-d0e1-2345-f012-456789012345', // Robert Johnson
   'a7b8c9d0-e1f2-3456-0123-567890123456', // Emily Chen
   'b8c9d0e1-f2a3-4567-1234-678901234567', // David Williams
@@ -158,8 +163,38 @@ export const mockCustomers: Customer[] = [
     email: 'maria.garcia@email.com',
     created_at: '2024-04-15T14:30:00Z',
   },
+  // === CONVERTED REFERRALS (for deep chain demo) ===
   {
-    id: CUSTOMER_IDS[2],
+    id: CUSTOMER_IDS[2], // Mark Thompson - was referred by John Smith
+    name: 'Mark Thompson',
+    phone: '(555) 444-3333',
+    email: 'mark.t@email.com',
+    created_at: '2025-08-20T10:00:00Z', // Became customer after being referred
+  },
+  {
+    id: CUSTOMER_IDS[3], // Nancy White - was referred by Maria Garcia
+    name: 'Nancy White',
+    phone: '(555) 222-3333',
+    email: 'nancy.w@email.com',
+    created_at: '2025-09-15T14:00:00Z',
+  },
+  {
+    id: CUSTOMER_IDS[4], // Tom Anderson - was referred by John Smith
+    name: 'Tom Anderson',
+    phone: '(555) 111-2222',
+    email: 'tom.a@email.com',
+    created_at: '2025-08-25T09:00:00Z',
+  },
+  {
+    id: CUSTOMER_IDS[5], // Kevin Lee - was referred by Mark Thompson (2nd generation!)
+    name: 'Kevin Lee',
+    phone: '(555) 444-5555',
+    email: 'kevin.lee@email.com',
+    created_at: '2025-11-10T11:00:00Z',
+  },
+  // === ORIGINAL CUSTOMERS (other reps) ===
+  {
+    id: 'f6a7b8c9-d0e1-2345-f012-456789012345',
     name: 'Robert Johnson',
     phone: '(555) 345-6789',
     email: 'robert.j@email.com',
@@ -609,15 +644,160 @@ export const mockReferrals: Referral[] = [
     value: 250,
     notes: 'Second referral from John Smith this month',
     created_at: '2026-01-27T08:00:00Z',
-    updated_at: '2026-01-27T08:00:00Z', // Today
+    updated_at: '2026-01-27T08:00:00Z',
+  },
+  
+  // === DEEP CHAIN REFERRALS ===
+  // Referrals from Mark Thompson (converted customer, originally referred by John Smith)
+  {
+    id: 'mark-ref-001',
+    referrer_id: CUSTOMER_IDS[2], // Mark Thompson
+    referee_name: 'Kevin Lee', // This person becomes a customer too!
+    referee_phone: '(555) 444-5555',
+    referee_email: 'kevin.lee@email.com',
+    status: 'sold',
+    value: 250,
+    notes: 'Mark referred his neighbor Kevin',
+    created_at: '2025-09-10T14:00:00Z',
+    updated_at: '2025-10-02T16:30:00Z',
+  },
+  {
+    id: 'mark-ref-002',
+    referrer_id: CUSTOMER_IDS[2], // Mark Thompson
+    referee_name: 'Susan Parker',
+    referee_phone: '(555) 321-4321',
+    referee_email: 'susan.p@email.com',
+    status: 'quoted',
+    value: 250,
+    notes: 'Mark referred his coworker',
+    created_at: '2025-12-15T10:00:00Z',
+    updated_at: '2025-12-22T14:00:00Z',
+  },
+  {
+    id: 'mark-ref-003',
+    referrer_id: CUSTOMER_IDS[2], // Mark Thompson
+    referee_name: 'Jason Miller',
+    referee_phone: '(555) 654-7890',
+    referee_email: 'jason.m@email.com',
+    status: 'contacted',
+    value: 250,
+    notes: 'Family friend of Mark',
+    created_at: '2026-01-10T09:00:00Z',
+    updated_at: '2026-01-12T11:00:00Z',
+  },
+  
+  // Referrals from Kevin Lee (3RD GENERATION - referred by Mark who was referred by John!)
+  {
+    id: 'kevin-ref-001',
+    referrer_id: CUSTOMER_IDS[5], // Kevin Lee
+    referee_name: 'Brandon Hayes',
+    referee_phone: '(555) 987-1234',
+    referee_email: 'brandon.h@email.com',
+    status: 'sold',
+    value: 250,
+    notes: 'Kevin referred his brother-in-law',
+    created_at: '2025-12-01T08:00:00Z',
+    updated_at: '2025-12-20T15:00:00Z',
+  },
+  {
+    id: 'kevin-ref-002',
+    referrer_id: CUSTOMER_IDS[5], // Kevin Lee
+    referee_name: 'Ashley Morgan',
+    referee_phone: '(555) 876-5432',
+    referee_email: 'ashley.m@email.com',
+    status: 'quoted',
+    value: 250,
+    notes: 'Neighbor across the street from Kevin',
+    created_at: '2026-01-05T14:30:00Z',
+    updated_at: '2026-01-12T10:00:00Z',
+  },
+  {
+    id: 'kevin-ref-003',
+    referrer_id: CUSTOMER_IDS[5], // Kevin Lee
+    referee_name: 'Tyler James',
+    referee_phone: '(555) 234-8765',
+    referee_email: 'tyler.j@email.com',
+    status: 'submitted',
+    value: 250,
+    notes: 'Kevin spreading the word!',
+    created_at: '2026-01-22T16:00:00Z',
+    updated_at: '2026-01-22T16:00:00Z',
+  },
+  
+  // Referrals from Tom Anderson (converted customer, originally referred by John Smith)
+  {
+    id: 'tom-ref-001',
+    referrer_id: CUSTOMER_IDS[4], // Tom Anderson
+    referee_name: 'Rachel Green',
+    referee_phone: '(555) 999-0000',
+    referee_email: 'rachel.g@email.com',
+    status: 'sold',
+    value: 250,
+    notes: 'Tom referred his sister',
+    created_at: '2025-10-22T11:00:00Z',
+    updated_at: '2025-11-15T15:00:00Z',
+  },
+  {
+    id: 'tom-ref-002',
+    referrer_id: CUSTOMER_IDS[4], // Tom Anderson
+    referee_name: 'Derek Stone',
+    referee_phone: '(555) 111-3333',
+    referee_email: 'derek.s@email.com',
+    status: 'contacted',
+    value: 250,
+    notes: 'Gym buddy of Tom',
+    created_at: '2026-01-15T13:00:00Z',
+    updated_at: '2026-01-17T10:00:00Z',
+  },
+  
+  // Referrals from Nancy White (converted customer, originally referred by Maria Garcia)
+  {
+    id: 'nancy-ref-001',
+    referrer_id: CUSTOMER_IDS[3], // Nancy White
+    referee_name: 'Greg Foster',
+    referee_phone: '(555) 222-4444',
+    referee_email: 'greg.f@email.com',
+    status: 'sold',
+    value: 250,
+    notes: 'Nancy referred her boss',
+    created_at: '2025-11-08T09:00:00Z',
+    updated_at: '2025-12-01T14:00:00Z',
+  },
+  {
+    id: 'nancy-ref-002',
+    referrer_id: CUSTOMER_IDS[3], // Nancy White
+    referee_name: 'Megan Cruz',
+    referee_phone: '(555) 333-5555',
+    referee_email: 'megan.c@email.com',
+    status: 'quoted',
+    value: 250,
+    notes: 'Book club friend',
+    created_at: '2026-01-08T11:00:00Z',
+    updated_at: '2026-01-15T16:00:00Z',
+  },
+  {
+    id: 'nancy-ref-003',
+    referrer_id: CUSTOMER_IDS[3], // Nancy White
+    referee_name: 'Ryan Bennett',
+    referee_phone: '(555) 444-6666',
+    referee_email: 'ryan.b@email.com',
+    status: 'submitted',
+    value: 250,
+    notes: 'Church group member',
+    created_at: '2026-01-25T08:30:00Z',
+    updated_at: '2026-01-25T08:30:00Z',
   },
 ];
 
 // Rep-Customer assignments - distributed across all 8 reps
 export const mockRepCustomers: RepCustomer[] = [
-  // Alex (Admin) handles customers 0-1
-  { rep_id: REP_ADMIN_ID, customer_id: CUSTOMER_IDS[0], assigned_at: '2024-01-20T10:00:00Z' },
-  { rep_id: REP_ADMIN_ID, customer_id: CUSTOMER_IDS[1], assigned_at: '2024-04-15T14:30:00Z' },
+  // Alex (Admin) handles seed customers + their converted referrals (deep chain)
+  { rep_id: REP_ADMIN_ID, customer_id: CUSTOMER_IDS[0], assigned_at: '2024-01-20T10:00:00Z' }, // John Smith (seed)
+  { rep_id: REP_ADMIN_ID, customer_id: CUSTOMER_IDS[1], assigned_at: '2024-04-15T14:30:00Z' }, // Maria Garcia (seed)
+  { rep_id: REP_ADMIN_ID, customer_id: CUSTOMER_IDS[2], assigned_at: '2025-08-20T10:00:00Z' }, // Mark Thompson (converted from John's referral)
+  { rep_id: REP_ADMIN_ID, customer_id: CUSTOMER_IDS[3], assigned_at: '2025-09-15T14:00:00Z' }, // Nancy White (converted from Maria's referral)
+  { rep_id: REP_ADMIN_ID, customer_id: CUSTOMER_IDS[4], assigned_at: '2025-08-25T09:00:00Z' }, // Tom Anderson (converted from John's referral)
+  { rep_id: REP_ADMIN_ID, customer_id: CUSTOMER_IDS[5], assigned_at: '2025-11-10T11:00:00Z' }, // Kevin Lee (converted from Mark's referral - 2nd gen!)
   // Rachel (Admin 2) handles customers 2-3
   { rep_id: REP_ADMIN_2_ID, customer_id: CUSTOMER_IDS[2], assigned_at: '2024-07-22T09:15:00Z' },
   { rep_id: REP_ADMIN_2_ID, customer_id: CUSTOMER_IDS[3], assigned_at: '2024-10-05T11:45:00Z' },
