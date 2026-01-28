@@ -136,12 +136,6 @@ function ReferralNode({ data }: { data: any }) {
   );
 }
 
-const nodeTypes = {
-  rep: RepNode,
-  customer: CustomerNode,
-  referral: ReferralNode,
-};
-
 // Dagre layout
 function getLayoutedElements(nodes: Node[], edges: Edge[]): { nodes: Node[]; edges: Edge[] } {
   const g = new dagre.graphlib.Graph();
@@ -169,6 +163,13 @@ function getLayoutedElements(nodes: Node[], edges: Edge[]): { nodes: Node[]; edg
   return { nodes: layoutedNodes, edges };
 }
 
+// Define nodeTypes outside component to prevent recreating on each render
+const nodeTypes = {
+  rep: RepNode,
+  customer: CustomerNode,
+  referral: ReferralNode,
+};
+
 function TreeViewInner() {
   const { rep, isLoading: authLoading } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -176,7 +177,6 @@ function TreeViewInner() {
   const [loading, setLoading] = useState(true);
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   const { fitView } = useReactFlow();
-  const initialLoad = useRef(true);
 
   useEffect(() => {
     async function loadData() {
