@@ -12,7 +12,7 @@ import {
   Network,
   ArrowLeft,
   ChevronDown,
-  ChevronUp,
+  ChevronRight,
   User,
   Shield,
   Phone,
@@ -24,11 +24,18 @@ import type { Customer, Referral, ReferralStatus } from '@/types/database';
 
 const REFERRAL_BONUS = 250;
 
-const statusConfig: Record<ReferralStatus, { bg: string; border: string; text: string; label: string; glow: string }> = {
-  submitted: { bg: 'bg-slate-800', border: 'border-slate-500', text: 'text-slate-300', label: 'Submitted', glow: '' },
-  contacted: { bg: 'bg-sky-950', border: 'border-sky-400', text: 'text-sky-300', label: 'Contacted', glow: 'shadow-sky-500/20' },
-  quoted: { bg: 'bg-amber-950', border: 'border-amber-400', text: 'text-amber-300', label: 'Quoted', glow: 'shadow-amber-500/20' },
-  sold: { bg: 'bg-emerald-950', border: 'border-emerald-400', text: 'text-emerald-300', label: 'Closed', glow: 'shadow-emerald-500/20' },
+const statusColors: Record<ReferralStatus, string> = {
+  submitted: 'border-slate-500 bg-slate-800/80',
+  contacted: 'border-sky-500 bg-sky-950/80',
+  quoted: 'border-amber-500 bg-amber-950/80',
+  sold: 'border-emerald-500 bg-emerald-950/80',
+};
+
+const statusLabels: Record<ReferralStatus, string> = {
+  submitted: 'Submitted',
+  contacted: 'Contacted', 
+  quoted: 'Quoted',
+  sold: 'Closed',
 };
 
 export default function TreePage() {
@@ -41,7 +48,6 @@ export default function TreePage() {
   useEffect(() => {
     async function loadData() {
       if (!rep) return;
-
       try {
         const [customersData, referralsData] = await Promise.all([
           getCustomersByRep(rep.id),
@@ -54,52 +60,26 @@ export default function TreePage() {
           if (response.ok) {
             const data = await response.json();
             const customerIds = new Set(customersData.map((c) => c.id));
-            apiReferrals = (data.referrals || []).filter(
-              (r: Referral) => customerIds.has(r.referrer_id)
-            );
+            apiReferrals = (data.referrals || []).filter((r: Referral) => customerIds.has(r.referrer_id));
           }
-        } catch (err) {
-          console.error('Error fetching API referrals:', err);
-        }
+        } catch {}
 
         const apiIds = new Set(apiReferrals.map((r) => r.id));
-        const combinedReferrals = [
-          ...apiReferrals,
-          ...referralsData.filter((r) => !apiIds.has(r.id)),
-        ];
-
         setCustomers(customersData);
-        setReferrals(combinedReferrals);
+        setReferrals([...apiReferrals, ...referralsData.filter((r) => !apiIds.has(r.id))]);
         setExpandedCustomers(new Set(customersData.map(c => c.id)));
       } catch (error) {
-        console.error('Error loading tree data:', error);
+        console.error('Error loading data:', error);
       } finally {
         setLoading(false);
       }
     }
-
-    if (rep) {
-      loadData();
-    }
+    if (rep) loadData();
   }, [rep]);
-
-  const toggleCustomer = (customerId: string) => {
-    setExpandedCustomers(prev => {
-      const next = new Set(prev);
-      if (next.has(customerId)) {
-        next.delete(customerId);
-      } else {
-        next.add(customerId);
-      }
-      return next;
-    });
-  };
 
   const referralsByCustomer = useMemo(() => {
     const map: Record<string, Referral[]> = {};
-    customers.forEach(c => {
-      map[c.id] = referrals.filter(r => r.referrer_id === c.id);
-    });
+    customers.forEach(c => { map[c.id] = referrals.filter(r => r.referrer_id === c.id); });
     return map;
   }, [customers, referrals]);
 
@@ -110,35 +90,25 @@ export default function TreePage() {
       totalReferrals: referrals.length,
       soldCount,
       totalEarnings: soldCount * REFERRAL_BONUS,
-      potentialEarnings: (referrals.length - soldCount) * REFERRAL_BONUS,
     };
   }, [customers, referrals]);
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <Network className="w-12 h-12 text-guardian-gold/50" />
-          <p className="text-slate-400">Loading your network...</p>
-        </div>
+      <div className="flex items-center justify-center h-96">
+        <Network className="w-12 h-12 text-guardian-gold/50 animate-pulse" />
       </div>
     );
   }
 
   if (customers.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center">
+      <div className="flex flex-col items-center justify-center h-96 text-center">
         <Network className="w-16 h-16 text-slate-600 mb-4" />
         <h2 className="text-xl font-semibold text-white mb-2">No Network Yet</h2>
-        <p className="text-slate-400 max-w-md mb-6">
-          Once you have customers and they start referring others, your referral
-          network will appear here.
-        </p>
-        <Link
-          href="/dashboard/qr"
-          className="px-4 py-2 bg-guardian-gold text-guardian-navy font-semibold rounded-xl hover:bg-guardian-gold/90 transition-colors"
-        >
-          Share Your QR Code
+        <p className="text-slate-400 mb-4">Add customers to see your referral network.</p>
+        <Link href="/dashboard/qr" className="px-4 py-2 bg-guardian-gold text-guardian-navy font-semibold rounded-xl">
+          Share QR Code
         </Link>
       </div>
     );
@@ -149,7 +119,7 @@ export default function TreePage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all">
+          <Link href="/dashboard" className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
@@ -157,301 +127,146 @@ export default function TreePage() {
             <p className="text-sm text-slate-400">Click customers to expand/collapse</p>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 rounded-full">
+        <div className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center gap-2">
           <DollarSign className="w-5 h-5 text-emerald-400" />
           <span className="text-xl font-bold text-emerald-400">${stats.totalEarnings}</span>
-          <span className="text-sm text-emerald-300/70">earned</span>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Users} value={stats.totalCustomers} label="Customers" color="gold" />
-        <StatCard icon={Network} value={stats.totalReferrals} label="Referrals" color="blue" />
-        <StatCard icon={CheckCircle} value={stats.soldCount} label="Closed" color="green" />
-        <StatCard icon={TrendingUp} value={`$${stats.potentialEarnings}`} label="Pending" color="amber" />
+      <div className="grid grid-cols-4 gap-4">
+        <div className="p-4 rounded-xl bg-guardian-gold/10 border border-guardian-gold/20">
+          <Users className="w-5 h-5 text-guardian-gold mb-1" />
+          <p className="text-2xl font-bold text-white">{stats.totalCustomers}</p>
+          <p className="text-xs text-slate-400">Customers</p>
+        </div>
+        <div className="p-4 rounded-xl bg-sky-500/10 border border-sky-500/20">
+          <Network className="w-5 h-5 text-sky-400 mb-1" />
+          <p className="text-2xl font-bold text-white">{stats.totalReferrals}</p>
+          <p className="text-xs text-slate-400">Referrals</p>
+        </div>
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+          <CheckCircle className="w-5 h-5 text-emerald-400 mb-1" />
+          <p className="text-2xl font-bold text-white">{stats.soldCount}</p>
+          <p className="text-xs text-slate-400">Closed</p>
+        </div>
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <TrendingUp className="w-5 h-5 text-amber-400 mb-1" />
+          <p className="text-2xl font-bold text-white">${(stats.totalReferrals - stats.soldCount) * 250}</p>
+          <p className="text-xs text-slate-400">Pending</p>
+        </div>
       </div>
 
-      {/* Org Chart Tree */}
-      <div className="rounded-2xl bg-slate-900/50 border border-slate-700/50 p-8 overflow-x-auto">
-        <div className="org-tree">
-          {/* Sales Rep - Root */}
-          <ul className="flex justify-center">
-            <li className="relative flex flex-col items-center">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="node-card rep-node"
-              >
-                <div className="node-badge gold">Sales Rep</div>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-guardian-gold/30 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-guardian-gold" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-white text-lg">{rep?.name}</p>
-                    <p className="text-sm text-slate-400">{customers.length} customers</p>
-                  </div>
-                </div>
-              </motion.div>
+      {/* Tree */}
+      <div className="bg-slate-900/50 border border-slate-700/50 rounded-2xl p-6">
+        {/* Rep */}
+        <div className="flex flex-col items-center">
+          <div className="px-6 py-4 rounded-2xl bg-gradient-to-br from-guardian-gold/20 to-guardian-gold/5 border-2 border-guardian-gold">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-guardian-gold/30 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-guardian-gold" />
+              </div>
+              <div>
+                <p className="text-xs text-guardian-gold font-semibold uppercase">Sales Rep</p>
+                <p className="font-bold text-white text-lg">{rep?.name}</p>
+              </div>
+            </div>
+          </div>
 
-              {/* Customers */}
-              {customers.length > 0 && (
-                <ul className="flex gap-6 pt-8 relative before:absolute before:top-0 before:left-1/2 before:-translate-x-1/2 before:w-px before:h-8 before:bg-sky-500">
-                  {/* Horizontal connector line */}
-                  {customers.length > 1 && (
-                    <div className="absolute top-8 left-0 right-0 h-px bg-sky-500" style={{ left: '25%', right: '25%' }} />
-                  )}
+          {/* Connector */}
+          <div className="w-px h-8 bg-slate-600" />
+          
+          {/* Customers row */}
+          <div className="flex gap-8 items-start">
+            {customers.map((customer) => {
+              const custReferrals = referralsByCustomer[customer.id] || [];
+              const isExpanded = expandedCustomers.has(customer.id);
+              const soldCount = custReferrals.filter(r => r.status === 'sold').length;
+
+              return (
+                <div key={customer.id} className="flex flex-col items-center">
+                  {/* Connector from horizontal line */}
+                  <div className="w-px h-4 bg-slate-600" />
                   
-                  {customers.map((customer, idx) => {
-                    const custReferrals = referralsByCustomer[customer.id] || [];
-                    const isExpanded = expandedCustomers.has(customer.id);
-                    const soldCount = custReferrals.filter(r => r.status === 'sold').length;
+                  {/* Customer card */}
+                  <button
+                    onClick={() => {
+                      setExpandedCustomers(prev => {
+                        const next = new Set(prev);
+                        next.has(customer.id) ? next.delete(customer.id) : next.add(customer.id);
+                        return next;
+                      });
+                    }}
+                    className="px-5 py-4 rounded-xl bg-sky-900/50 border-2 border-sky-500/50 hover:border-sky-400 transition-all min-w-[200px] text-left relative"
+                  >
+                    {soldCount > 0 && (
+                      <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-full">
+                        ${soldCount * 250}
+                      </span>
+                    )}
+                    <p className="text-xs text-sky-400 font-semibold uppercase mb-1">Customer</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center">
+                        <User className="w-5 h-5 text-sky-400" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-white">{customer.name}</p>
+                        <p className="text-xs text-slate-400">{custReferrals.length} referrals</p>
+                      </div>
+                      {custReferrals.length > 0 && (
+                        isExpanded ? <ChevronDown className="w-5 h-5 text-sky-400" /> : <ChevronRight className="w-5 h-5 text-slate-500" />
+                      )}
+                    </div>
+                  </button>
 
-                    return (
-                      <li key={customer.id} className="relative flex flex-col items-center">
-                        {/* Vertical line down to customer */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-8 -mt-8 bg-sky-500" />
-                        
-                        <motion.button
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: idx * 0.1 }}
-                          onClick={() => toggleCustomer(customer.id)}
-                          className="node-card customer-node"
-                        >
-                          <div className="node-badge blue">Customer</div>
-                          {soldCount > 0 && (
-                            <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-full z-10">
-                              ${soldCount * REFERRAL_BONUS}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-sky-500/30 flex items-center justify-center">
-                              <User className="w-5 h-5 text-sky-400" />
-                            </div>
-                            <div className="text-left flex-1">
-                              <p className="font-semibold text-white">{customer.name}</p>
-                              <p className="text-xs text-slate-400">{custReferrals.length} referrals</p>
-                            </div>
-                            {custReferrals.length > 0 && (
-                              isExpanded 
-                                ? <ChevronUp className="w-5 h-5 text-sky-400" />
-                                : <ChevronDown className="w-5 h-5 text-slate-500" />
-                            )}
-                          </div>
-                        </motion.button>
-
-                        {/* Referrals */}
-                        <AnimatePresence>
-                          {isExpanded && custReferrals.length > 0 && (
-                            <motion.ul
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="flex flex-wrap gap-4 justify-center pt-8 relative overflow-visible"
-                            >
-                              {/* Vertical line from customer */}
-                              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-8 bg-slate-500" />
-                              
-                              {/* Horizontal connector if multiple */}
-                              {custReferrals.length > 1 && (
-                                <div 
-                                  className="absolute top-8 h-px bg-slate-500" 
-                                  style={{ 
-                                    left: `calc(50% - ${Math.min(custReferrals.length - 1, 2) * 85}px)`,
-                                    right: `calc(50% - ${Math.min(custReferrals.length - 1, 2) * 85}px)`,
-                                  }} 
-                                />
+                  {/* Referrals */}
+                  <AnimatePresence>
+                    {isExpanded && custReferrals.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="flex flex-col items-center"
+                      >
+                        <div className="w-px h-6 bg-slate-600" />
+                        <div className="flex gap-3 flex-wrap justify-center max-w-md">
+                          {custReferrals.map((ref) => (
+                            <div
+                              key={ref.id}
+                              className={clsx(
+                                'px-4 py-3 rounded-xl border-2 w-40',
+                                statusColors[ref.status]
                               )}
-                              
-                              {custReferrals.map((referral, refIdx) => {
-                                const config = statusConfig[referral.status];
-                                return (
-                                  <motion.li
-                                    key={referral.id}
-                                    initial={{ y: 10, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: refIdx * 0.03 }}
-                                    className="relative flex flex-col items-center"
-                                  >
-                                    {/* Vertical connector */}
-                                    <div className={clsx(
-                                      'absolute top-0 left-1/2 -translate-x-1/2 w-px h-8 -mt-8',
-                                      config.border.replace('border-', 'bg-')
-                                    )} />
-                                    
-                                    <div className={clsx(
-                                      'node-card referral-node',
-                                      config.bg,
-                                      config.border,
-                                      config.glow && `shadow-lg ${config.glow}`
-                                    )}>
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <div className="w-8 h-8 rounded-lg bg-slate-700/50 flex items-center justify-center flex-shrink-0">
-                                          <User className="w-4 h-4 text-slate-400" />
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                          <p className="font-medium text-white text-sm truncate">{referral.referee_name}</p>
-                                          {referral.referee_phone && (
-                                            <p className="text-[10px] text-slate-500 flex items-center gap-1 truncate">
-                                              <Phone className="w-2.5 h-2.5 flex-shrink-0" />
-                                              <span className="truncate">{referral.referee_phone}</span>
-                                            </p>
-                                          )}
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center justify-between gap-2">
-                                        <span className={clsx('text-xs font-semibold', config.text)}>
-                                          {config.label}
-                                        </span>
-                                        {referral.status === 'sold' && (
-                                          <span className="text-emerald-400 font-bold text-sm">$250</span>
-                                        )}
-                                      </div>
-                                      <div className="mt-1.5 text-[10px] text-slate-500 flex items-center gap-1">
-                                        <Calendar className="w-2.5 h-2.5" />
-                                        {new Date(referral.created_at).toLocaleDateString()}
-                                      </div>
-                                    </div>
-                                  </motion.li>
-                                );
-                              })}
-                            </motion.ul>
-                          )}
-                        </AnimatePresence>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
-          </ul>
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-7 h-7 rounded-lg bg-slate-700/50 flex items-center justify-center">
+                                  <User className="w-3.5 h-3.5 text-slate-400" />
+                                </div>
+                                <p className="font-medium text-white text-sm truncate flex-1">{ref.referee_name}</p>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-slate-300">{statusLabels[ref.status]}</span>
+                                {ref.status === 'sold' && <span className="text-emerald-400 font-bold text-sm">$250</span>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-6 flex-wrap text-sm">
-        <span className="flex items-center gap-2 text-slate-400">
-          <span className="w-4 h-4 rounded-lg bg-guardian-gold/30 border-2 border-guardian-gold" />
-          Sales Rep
-        </span>
-        <span className="flex items-center gap-2 text-slate-400">
-          <span className="w-4 h-4 rounded-lg bg-sky-900/50 border-2 border-sky-500" />
-          Customer
-        </span>
-        <span className="w-px h-4 bg-slate-700" />
-        {(Object.keys(statusConfig) as ReferralStatus[]).map((status) => (
-          <span key={status} className="flex items-center gap-1.5 text-slate-400">
-            <span className={clsx('w-2.5 h-2.5 rounded-full', statusConfig[status].border.replace('border-', 'bg-'))} />
-            {statusConfig[status].label}
-          </span>
-        ))}
-      </div>
-
-      {/* CSS for org chart tree */}
-      <style jsx>{`
-        .org-tree ul {
-          position: relative;
-          padding-top: 0;
-          list-style: none;
-          margin: 0;
-          padding: 0;
-        }
-        
-        .org-tree li {
-          list-style: none;
-        }
-        
-        .node-card {
-          position: relative;
-          padding: 1rem 1.25rem;
-          border-radius: 1rem;
-          border-width: 2px;
-          transition: all 0.2s;
-          min-width: 200px;
-        }
-        
-        .node-card:hover {
-          transform: translateY(-2px);
-        }
-        
-        .rep-node {
-          background: linear-gradient(to bottom right, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));
-          border-color: rgba(212, 175, 55, 0.8);
-          box-shadow: 0 8px 32px rgba(212, 175, 55, 0.2);
-        }
-        
-        .customer-node {
-          background: linear-gradient(to bottom right, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0.05));
-          border-color: rgba(14, 165, 233, 0.6);
-          box-shadow: 0 4px 24px rgba(14, 165, 233, 0.15);
-          cursor: pointer;
-        }
-        
-        .customer-node:hover {
-          border-color: rgba(14, 165, 233, 0.8);
-          box-shadow: 0 8px 32px rgba(14, 165, 233, 0.25);
-        }
-        
-        .referral-node {
-          min-width: 160px;
-          max-width: 180px;
-        }
-        
-        .node-badge {
-          position: absolute;
-          top: -10px;
-          left: 12px;
-          padding: 2px 10px;
-          font-size: 10px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          border-radius: 9999px;
-        }
-        
-        .node-badge.gold {
-          background: rgb(212, 175, 55);
-          color: rgb(23, 23, 23);
-        }
-        
-        .node-badge.blue {
-          background: rgb(14, 165, 233);
-          color: white;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function StatCard({ 
-  icon: Icon, 
-  value, 
-  label, 
-  color 
-}: { 
-  icon: any; 
-  value: string | number; 
-  label: string;
-  color: 'gold' | 'blue' | 'green' | 'amber';
-}) {
-  const colors = {
-    gold: 'from-guardian-gold/20 to-guardian-gold/5 border-guardian-gold/20 text-guardian-gold',
-    blue: 'from-sky-500/20 to-sky-500/5 border-sky-500/20 text-sky-400',
-    green: 'from-emerald-500/20 to-emerald-500/5 border-emerald-500/20 text-emerald-400',
-    amber: 'from-amber-500/20 to-amber-500/5 border-amber-500/20 text-amber-400',
-  };
-
-  return (
-    <div className={clsx('p-4 rounded-xl bg-gradient-to-br border', colors[color])}>
-      <div className="flex items-center gap-3">
-        <Icon className="w-5 h-5" />
-        <div>
-          <p className="text-2xl font-bold text-white">{value}</p>
-          <p className="text-xs text-slate-400">{label}</p>
-        </div>
+      <div className="flex justify-center gap-6 text-sm text-slate-400">
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-slate-500" /> Submitted</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-sky-500" /> Contacted</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-amber-500" /> Quoted</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-500" /> Closed</span>
       </div>
     </div>
   );
