@@ -16,6 +16,11 @@ import {
   User,
   Shield,
   UserPlus,
+  Phone,
+  Mail,
+  Calendar,
+  MessageSquare,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { clsx } from 'clsx';
@@ -23,21 +28,13 @@ import type { Customer, Referral, ReferralStatus } from '@/types/database';
 
 const REFERRAL_BONUS = 250;
 
-const statusColors: Record<ReferralStatus, { border: string; bg: string; text: string }> = {
-  submitted: { border: 'border-slate-500', bg: 'bg-slate-800/80', text: 'text-slate-300' },
-  contacted: { border: 'border-sky-500', bg: 'bg-sky-950/80', text: 'text-sky-300' },
-  quoted: { border: 'border-amber-500', bg: 'bg-amber-950/80', text: 'text-amber-300' },
-  sold: { border: 'border-emerald-500', bg: 'bg-emerald-950/80', text: 'text-emerald-300' },
+const statusConfig: Record<ReferralStatus, { bg: string; border: string; text: string; glow: string; label: string }> = {
+  submitted: { bg: 'bg-slate-800/60', border: 'border-slate-500/40', text: 'text-slate-300', glow: '', label: 'Submitted' },
+  contacted: { bg: 'bg-sky-950/60', border: 'border-sky-500/40', text: 'text-sky-300', glow: 'shadow-sky-500/10', label: 'Contacted' },
+  quoted: { bg: 'bg-amber-950/60', border: 'border-amber-500/40', text: 'text-amber-300', glow: 'shadow-amber-500/10', label: 'Quoted' },
+  sold: { bg: 'bg-emerald-950/60', border: 'border-emerald-500/40', text: 'text-emerald-300', glow: 'shadow-emerald-500/20', label: 'Closed' },
 };
 
-const statusLabels: Record<ReferralStatus, string> = {
-  submitted: 'Submitted',
-  contacted: 'Contacted',
-  quoted: 'Quoted',
-  sold: 'Closed',
-};
-
-// Tree node representing either a customer or a referral
 interface TreeNode {
   id: string;
   name: string;
@@ -79,14 +76,10 @@ export default function TreePage() {
         } catch {}
 
         const apiIds = new Set(apiReferrals.map((r) => r.id));
-        const allReferrals = [...apiReferrals, ...referralsData.filter((r) => !apiIds.has(r.id))];
-        
         setCustomers(customersData);
-        setReferrals(allReferrals);
+        setReferrals([...apiReferrals, ...referralsData.filter((r) => !apiIds.has(r.id))]);
         
-        // Expand all by default
-        const allIds = new Set<string>();
-        allIds.add('rep');
+        const allIds = new Set<string>(['rep']);
         customersData.forEach(c => allIds.add(`customer-${c.id}`));
         setExpandedNodes(allIds);
       } catch (error) {
@@ -98,16 +91,15 @@ export default function TreePage() {
     if (rep) loadData();
   }, [rep]);
 
-  // Build the tree structure
-  // Check if a referral has become a customer (by matching name)
   const tree = useMemo((): TreeNode | null => {
     if (!rep) return null;
 
-    // Create a map of customer names to their data for matching referrals who became customers
     const customerByName = new Map<string, Customer>();
     customers.forEach(c => customerByName.set(c.name.toLowerCase().trim(), c));
 
-    // Create a map of referrals by referrer_id
+    const customerById = new Map<string, Customer>();
+    customers.forEach(c => customerById.set(c.id, c));
+
     const referralsByReferrer = new Map<string, Referral[]>();
     referrals.forEach(r => {
       const existing = referralsByReferrer.get(r.referrer_id) || [];
@@ -115,20 +107,11 @@ export default function TreePage() {
       referralsByReferrer.set(r.referrer_id, existing);
     });
 
-    // Get customer name by ID for "referred by" lookup
-    const customerById = new Map<string, Customer>();
-    customers.forEach(c => customerById.set(c.id, c));
-
-    // Recursive function to build referral chain
     function buildReferralNode(referral: Referral, visited: Set<string>): TreeNode {
-      const nodeId = `referral-${referral.id}`;
-      
-      // Check if this referral became a customer (has same name as a customer)
       const matchingCustomer = customerByName.get(referral.referee_name.toLowerCase().trim());
       const children: TreeNode[] = [];
       
       if (matchingCustomer && !visited.has(matchingCustomer.id)) {
-        // This referral became a customer - get their referrals
         visited.add(matchingCustomer.id);
         const theirReferrals = referralsByReferrer.get(matchingCustomer.id) || [];
         theirReferrals.forEach(r => {
@@ -139,11 +122,10 @@ export default function TreePage() {
         });
       }
 
-      // Get who referred this person
       const referrer = customerById.get(referral.referrer_id);
       
       return {
-        id: nodeId,
+        id: `referral-${referral.id}`,
         name: referral.referee_name,
         phone: referral.referee_phone,
         email: referral.referee_email,
@@ -157,7 +139,6 @@ export default function TreePage() {
       };
     }
 
-    // Build customer nodes
     const customerNodes: TreeNode[] = customers.map(customer => {
       const visited = new Set<string>([customer.id]);
       const custReferrals = referralsByReferrer.get(customer.id) || [];
@@ -167,9 +148,6 @@ export default function TreePage() {
         return buildReferralNode(r, visited);
       });
 
-      const soldCount = children.filter(c => c.status === 'sold').length;
-      const childEarnings = children.reduce((sum, c) => sum + c.earnings, 0);
-
       return {
         id: `customer-${customer.id}`,
         name: customer.name,
@@ -177,7 +155,7 @@ export default function TreePage() {
         email: customer.email,
         type: 'customer' as const,
         children,
-        earnings: childEarnings,
+        earnings: children.reduce((sum, c) => sum + c.earnings, 0),
       };
     });
 
@@ -200,28 +178,31 @@ export default function TreePage() {
 
   const stats = useMemo(() => {
     const soldCount = referrals.filter((r) => r.status === 'sold').length;
-    return {
-      totalCustomers: customers.length,
-      totalReferrals: referrals.length,
-      soldCount,
-      totalEarnings: soldCount * REFERRAL_BONUS,
-    };
+    return { totalCustomers: customers.length, totalReferrals: referrals.length, soldCount, totalEarnings: soldCount * REFERRAL_BONUS };
   }, [customers, referrals]);
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Network className="w-12 h-12 text-guardian-gold/50 animate-pulse" />
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-guardian-gold/20 to-guardian-gold/5 flex items-center justify-center animate-pulse">
+            <Network className="w-8 h-8 text-guardian-gold" />
+          </div>
+          <p className="text-slate-400">Loading your network...</p>
+        </div>
       </div>
     );
   }
 
   if (!tree || customers.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-96 text-center">
-        <Network className="w-16 h-16 text-slate-600 mb-4" />
-        <h2 className="text-xl font-semibold text-white mb-2">No Network Yet</h2>
-        <Link href="/dashboard/qr" className="px-4 py-2 bg-guardian-gold text-guardian-navy font-semibold rounded-xl">
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center border border-slate-700">
+          <Network className="w-10 h-10 text-slate-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-2">No Network Yet</h2>
+        <p className="text-slate-400 mb-6 max-w-md">Start building your referral network by sharing your QR code with customers.</p>
+        <Link href="/dashboard/qr" className="px-6 py-3 bg-gradient-to-r from-guardian-gold to-amber-500 text-guardian-navy font-semibold rounded-xl hover:shadow-lg hover:shadow-guardian-gold/25 transition-all">
           Share QR Code
         </Link>
       </div>
@@ -229,177 +210,223 @@ export default function TreePage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-white">My Referral Network</h1>
-            <p className="text-sm text-slate-400">Click any node to expand/collapse the referral chain</p>
+    <div className="min-h-screen">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/50 p-8 mb-8">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOGM5Ljk0MSAwIDE4LTguMDU5IDE4LTE4cy04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiMzMzQxNTUiIGZpbGwtb3BhY2l0eT0iLjEiLz48L2c+PC9zdmc+')] opacity-30" />
+        
+        <div className="relative flex items-center justify-between flex-wrap gap-6">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="p-3 rounded-xl bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all border border-slate-700/50">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-1">My Referral Network</h1>
+              <p className="text-slate-400">Track your complete referral hierarchy</p>
+            </div>
           </div>
+          
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 backdrop-blur-sm"
+          >
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-sm text-emerald-300/70">Total Earned</p>
+              <p className="text-3xl font-bold text-emerald-400">${stats.totalEarnings.toLocaleString()}</p>
+            </div>
+          </motion.div>
         </div>
-        <div className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center gap-2">
-          <DollarSign className="w-5 h-5 text-emerald-400" />
-          <span className="text-xl font-bold text-emerald-400">${stats.totalEarnings}</span>
+
+        {/* Stats Row */}
+        <div className="relative grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          {[
+            { icon: Users, value: stats.totalCustomers, label: 'Customers', color: 'guardian-gold' },
+            { icon: Network, value: stats.totalReferrals, label: 'Referrals', color: 'sky' },
+            { icon: CheckCircle, value: stats.soldCount, label: 'Closed', color: 'emerald' },
+            { icon: TrendingUp, value: `$${(stats.totalReferrals - stats.soldCount) * 250}`, label: 'Pending', color: 'amber' },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: i * 0.1 }}
+              className={clsx(
+                'p-4 rounded-xl border backdrop-blur-sm',
+                stat.color === 'guardian-gold' && 'bg-guardian-gold/10 border-guardian-gold/20',
+                stat.color === 'sky' && 'bg-sky-500/10 border-sky-500/20',
+                stat.color === 'emerald' && 'bg-emerald-500/10 border-emerald-500/20',
+                stat.color === 'amber' && 'bg-amber-500/10 border-amber-500/20',
+              )}
+            >
+              <stat.icon className={clsx(
+                'w-5 h-5 mb-2',
+                stat.color === 'guardian-gold' && 'text-guardian-gold',
+                stat.color === 'sky' && 'text-sky-400',
+                stat.color === 'emerald' && 'text-emerald-400',
+                stat.color === 'amber' && 'text-amber-400',
+              )} />
+              <p className="text-2xl font-bold text-white">{stat.value}</p>
+              <p className="text-xs text-slate-400">{stat.label}</p>
+            </motion.div>
+          ))}
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-guardian-gold/10 border border-guardian-gold/20">
-          <p className="text-2xl font-bold text-white">{stats.totalCustomers}</p>
-          <p className="text-xs text-slate-400">Customers</p>
+      {/* Tree Container */}
+      <div className="rounded-3xl bg-gradient-to-br from-slate-900/80 to-slate-950/80 border border-slate-700/50 backdrop-blur-sm p-8">
+        <div className="max-w-4xl mx-auto space-y-4">
+          <TreeNodeCard node={tree} expanded={expandedNodes} onToggle={toggleNode} depth={0} />
         </div>
-        <div className="p-4 rounded-xl bg-sky-500/10 border border-sky-500/20">
-          <p className="text-2xl font-bold text-white">{stats.totalReferrals}</p>
-          <p className="text-xs text-slate-400">Referrals</p>
-        </div>
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-          <p className="text-2xl font-bold text-white">{stats.soldCount}</p>
-          <p className="text-xs text-slate-400">Closed</p>
-        </div>
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-          <p className="text-2xl font-bold text-white">${(stats.totalReferrals - stats.soldCount) * 250}</p>
-          <p className="text-xs text-slate-400">Pending</p>
-        </div>
-      </div>
-
-      {/* Tree */}
-      <div className="bg-slate-900/50 border border-slate-700/50 rounded-2xl p-6 overflow-x-auto">
-        <TreeNodeComponent 
-          node={tree} 
-          expanded={expandedNodes} 
-          onToggle={toggleNode}
-          depth={0}
-        />
       </div>
 
       {/* Legend */}
-      <div className="flex justify-center gap-6 text-sm text-slate-400 flex-wrap">
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded bg-guardian-gold/30 border-2 border-guardian-gold" /> Sales Rep
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded bg-sky-900/50 border-2 border-sky-500" /> Customer
-        </span>
-        <span className="w-px h-4 bg-slate-700" />
-        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-slate-500" /> Submitted</span>
-        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-sky-500" /> Contacted</span>
-        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-amber-500" /> Quoted</span>
-        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-500" /> Closed</span>
+      <div className="flex justify-center gap-8 mt-8 flex-wrap text-sm">
+        <div className="flex items-center gap-6">
+          <span className="flex items-center gap-2 text-slate-400">
+            <span className="w-4 h-4 rounded-lg bg-guardian-gold/30 border border-guardian-gold" /> Rep
+          </span>
+          <span className="flex items-center gap-2 text-slate-400">
+            <span className="w-4 h-4 rounded-lg bg-sky-500/30 border border-sky-500" /> Customer
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          {Object.entries(statusConfig).map(([key, config]) => (
+            <span key={key} className="flex items-center gap-1.5 text-slate-500">
+              <span className={clsx('w-2.5 h-2.5 rounded-full', config.border.replace('border-', 'bg-').replace('/40', ''))} />
+              {config.label}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-// Recursive tree node component
-function TreeNodeComponent({ 
-  node, 
-  expanded, 
-  onToggle, 
-  depth 
-}: { 
-  node: TreeNode; 
-  expanded: Set<string>; 
-  onToggle: (id: string) => void;
-  depth: number;
-}) {
+function TreeNodeCard({ node, expanded, onToggle, depth }: { node: TreeNode; expanded: Set<string>; onToggle: (id: string) => void; depth: number }) {
   const isExpanded = expanded.has(node.id);
   const hasChildren = node.children.length > 0;
+  const config = node.status ? statusConfig[node.status] : null;
 
   return (
-    <div className="flex flex-col">
-      {/* Node card */}
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: depth * 0.05 }}
+    >
       <button
         onClick={() => hasChildren && onToggle(node.id)}
         className={clsx(
-          'flex items-start gap-3 px-3 py-2.5 rounded-lg border-2 transition-all text-left max-w-md',
-          hasChildren && 'cursor-pointer hover:border-opacity-100',
+          'w-full text-left rounded-2xl border backdrop-blur-sm transition-all duration-300',
+          'hover:shadow-xl hover:-translate-y-0.5',
+          hasChildren && 'cursor-pointer',
           !hasChildren && 'cursor-default',
-          node.type === 'rep' && 'bg-gradient-to-r from-guardian-gold/20 to-guardian-gold/5 border-guardian-gold',
-          node.type === 'customer' && !node.status && 'bg-sky-900/50 border-sky-500/50',
-          node.type === 'customer' && node.status && statusColors[node.status].bg + ' ' + statusColors[node.status].border,
-          node.type === 'referral' && node.status && statusColors[node.status].bg + ' ' + statusColors[node.status].border,
+          node.type === 'rep' && 'bg-gradient-to-r from-guardian-gold/20 via-guardian-gold/10 to-transparent border-guardian-gold/40 shadow-lg shadow-guardian-gold/10',
+          node.type === 'customer' && !node.status && 'bg-gradient-to-r from-sky-500/15 via-sky-500/5 to-transparent border-sky-500/30',
+          node.type === 'customer' && node.status && `${config?.bg} ${config?.border} shadow-lg ${config?.glow}`,
+          node.type === 'referral' && `${config?.bg} ${config?.border} shadow-lg ${config?.glow}`,
         )}
-        style={{ marginLeft: depth * 20 }}
+        style={{ marginLeft: depth * 32, maxWidth: `calc(100% - ${depth * 32}px)` }}
       >
-        {/* Expand icon */}
-        {hasChildren ? (
-          <div className="flex-shrink-0 mt-0.5">
-            {isExpanded ? (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
-            ) : (
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            )}
-          </div>
-        ) : (
-          <div className="w-4 flex-shrink-0" />
-        )}
+        <div className="p-5">
+          <div className="flex items-start gap-4">
+            {/* Expand Icon */}
+            <div className="flex-shrink-0 mt-1">
+              {hasChildren ? (
+                <div className={clsx(
+                  'w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
+                  isExpanded ? 'bg-white/10' : 'bg-white/5'
+                )}>
+                  {isExpanded ? <ChevronDown className="w-4 h-4 text-white" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+                </div>
+              ) : (
+                <div className="w-8" />
+              )}
+            </div>
 
-        {/* Icon */}
-        <div className={clsx(
-          'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
-          node.type === 'rep' && 'bg-guardian-gold/30',
-          node.type === 'customer' && 'bg-sky-500/20',
-          node.type === 'referral' && 'bg-slate-700/50',
-        )}>
-          {node.type === 'rep' && <Shield className="w-4 h-4 text-guardian-gold" />}
-          {node.type === 'customer' && <User className="w-4 h-4 text-sky-400" />}
-          {node.type === 'referral' && <UserPlus className="w-4 h-4 text-slate-400" />}
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className={clsx(
-              'text-[9px] font-bold uppercase px-1.5 py-0.5 rounded',
-              node.type === 'rep' && 'bg-guardian-gold text-guardian-navy',
-              node.type === 'customer' && !node.status && 'bg-sky-500 text-white',
-              node.type === 'customer' && node.status && 'bg-emerald-500 text-white',
-              node.type === 'referral' && 'bg-slate-600 text-slate-200',
+            {/* Avatar */}
+            <div className={clsx(
+              'w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border',
+              node.type === 'rep' && 'bg-gradient-to-br from-guardian-gold/30 to-guardian-gold/10 border-guardian-gold/30',
+              node.type === 'customer' && 'bg-gradient-to-br from-sky-500/30 to-sky-500/10 border-sky-500/30',
+              node.type === 'referral' && 'bg-gradient-to-br from-slate-700/50 to-slate-800/50 border-slate-600/30',
             )}>
-              {node.type === 'rep' ? 'Rep' : node.type === 'customer' && node.status ? 'Converted' : node.type}
-            </span>
-            {node.status && (
-              <span className={clsx('text-[9px] font-medium', statusColors[node.status].text)}>
-                {statusLabels[node.status]}
-              </span>
-            )}
-            {node.earnings > 0 && (
-              <span className="text-[10px] font-bold text-emerald-400">${node.earnings}</span>
-            )}
+              {node.type === 'rep' && <Shield className="w-7 h-7 text-guardian-gold" />}
+              {node.type === 'customer' && <User className="w-7 h-7 text-sky-400" />}
+              {node.type === 'referral' && <UserPlus className="w-7 h-7 text-slate-400" />}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className={clsx(
+                  'text-[10px] font-bold uppercase px-2 py-1 rounded-md',
+                  node.type === 'rep' && 'bg-guardian-gold text-guardian-navy',
+                  node.type === 'customer' && !node.status && 'bg-sky-500 text-white',
+                  node.type === 'customer' && node.status && 'bg-emerald-500 text-white',
+                  node.type === 'referral' && 'bg-slate-600 text-slate-200',
+                )}>
+                  {node.type === 'rep' ? 'Sales Rep' : node.type === 'customer' && node.status ? '✓ Converted' : node.type}
+                </span>
+                {node.status && (
+                  <span className={clsx('text-xs font-medium px-2 py-0.5 rounded-md bg-black/20', config?.text)}>
+                    {config?.label}
+                  </span>
+                )}
+                {node.earnings > 0 && (
+                  <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />${node.earnings}
+                  </span>
+                )}
+              </div>
+
+              <h3 className="text-xl font-bold text-white mb-2">{node.name}</h3>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                {node.phone && (
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Phone className="w-3.5 h-3.5 text-slate-500" />
+                    <span>{node.phone}</span>
+                  </div>
+                )}
+                {node.email && (
+                  <div className="flex items-center gap-2 text-slate-400 truncate">
+                    <Mail className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                    <span className="truncate">{node.email}</span>
+                  </div>
+                )}
+                {node.dateSubmitted && (
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                    <span>{new Date(node.dateSubmitted).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {node.referredBy && (
+                  <div className="flex items-center gap-2 text-sky-400">
+                    <User className="w-3.5 h-3.5" />
+                    <span>via {node.referredBy}</span>
+                  </div>
+                )}
+              </div>
+
+              {node.notes && (
+                <div className="mt-3 flex items-start gap-2 text-xs text-slate-500 italic">
+                  <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                  <span>"{node.notes}"</span>
+                </div>
+              )}
+
+              {hasChildren && (
+                <p className="mt-3 text-xs text-slate-500">
+                  {node.children.length} referral{node.children.length !== 1 ? 's' : ''} in network
+                </p>
+              )}
+            </div>
           </div>
-          
-          <p className="font-semibold text-white text-sm leading-tight">{node.name}</p>
-          
-          {/* Details row */}
-          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[10px] text-slate-500">
-            {node.phone && (
-              <span>📞 {node.phone}</span>
-            )}
-            {node.email && (
-              <span>✉️ {node.email}</span>
-            )}
-            {node.dateSubmitted && (
-              <span>📅 {new Date(node.dateSubmitted).toLocaleDateString()}</span>
-            )}
-            {node.referredBy && (
-              <span className="text-sky-400">👤 Referred by {node.referredBy}</span>
-            )}
-          </div>
-          
-          {node.notes && (
-            <p className="text-[10px] text-slate-400 mt-1 italic truncate">"{node.notes}"</p>
-          )}
-          
-          {hasChildren && (
-            <p className="text-[10px] text-slate-500 mt-1">
-              {node.children.length} referral{node.children.length !== 1 ? 's' : ''} below
-            </p>
-          )}
         </div>
       </button>
 
@@ -410,20 +437,14 @@ function TreeNodeComponent({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-1 space-y-1 border-l-2 border-slate-700/50 ml-3"
+            className="mt-3 space-y-3 pl-4 border-l-2 border-slate-700/30 ml-8"
           >
             {node.children.map(child => (
-              <TreeNodeComponent
-                key={child.id}
-                node={child}
-                expanded={expanded}
-                onToggle={onToggle}
-                depth={depth + 1}
-              />
+              <TreeNodeCard key={child.id} node={child} expanded={expanded} onToggle={onToggle} depth={depth + 1} />
             ))}
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
