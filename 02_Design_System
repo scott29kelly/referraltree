@@ -1,0 +1,36 @@
+# 02_DESIGN_SYSTEM.md
+
+## 🎨 App Color Palette
+
+### 🏦 Brand Core
+* **Guardian Navy:** `#0F172A` (Slate 900) – *App Background (Dark Mode)*
+* **Action Orange:** `#F97316` (Orange 500) – *Primary Buttons / Call-to-Actions*
+* **Profit Green:** `#10B981` (Emerald 500) – *Positive values ($250), "Sold" status tags.*
+
+### ☀️ Light Mode (The Office)
+* **Background:** `#F1F5F9` (Slate 100) – *Slightly grey to let white cards pop.*
+* **Cards:** `#FFFFFF` (White) – *With subtle shadow `shadow-sm`.*
+* **Text Primary:** `#0F172A` (Slate 900)
+* **Borders:** `#E2E8F0` (Slate 200)
+
+### 🌙 Dark Mode (The Field)
+* **Background:** `#020617` (Slate 950)
+* **Cards:** `#1E293B` (Slate 800) – *With 1px border `#334155`.*
+* **Text Primary:** `#F8FAFC` (Slate 50)
+* **Accents:** Glow effects on graphs and active states.
+
+## 🔠 Typography & Data
+* **Headings:** `Inter` (Tight tracking).
+* **Numbers/Currency:** `JetBrains Mono` or `Roboto Mono` (Tabular nums).
+    * *Why?* Financial data must align perfectly in tables.
+
+## 📱 PWA UI Patterns
+1.  **The "Thumb Zone":**
+    * On mobile, all primary actions (Add Referral, Share QR) must be in a **Floating Bottom Bar** or bottom-aligned Floating Action Button (FAB).
+2.  **Glass Panels:**
+    * Dashboards use semi-transparent backgrounds with blur.
+    * Example: `bg-slate-900/60 backdrop-blur-xl`.
+3.  **Status Pills:**
+    * Use "Dot" indicators inside pills.
+    * *Sold:* Green Dot + Green Background (Light).
+    * *Submitted:* Blue Dot + Blue Background (Light).
