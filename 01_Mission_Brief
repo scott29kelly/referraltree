@@ -1,0 +1,33 @@
+# 01_MISSION_BRIEF.md
+
+## 🎯 Project Objective
+Transform the `referraltree` PWA into a "2026 Premium" enterprise application. The goal is to move beyond a basic "tracking tool" to a high-end **Sales & Commission Command Center**.
+* **Current State:** Functional, utility-focused.
+* **Target State:** Tactile, gamified, and highly polished. It should feel like a premium Fintech app (e.g., Stripe, Cash App) for Reps, and a powerful CRM for Admins.
+
+## 👥 The Three Experiences
+1.  **Sales Rep (The "Earner"):**
+    * *Vibe:* Motivation & Speed.
+    * *Key Emotion:* "I am making money."
+    * *UX Priority:* One-tap sharing (QR), clear earnings visualization, gamified progress bars.
+2.  **Admin (The "Controller"):**
+    * *Vibe:* Clarity & Control.
+    * *Key Emotion:* "I have the full picture."
+    * *UX Priority:* Dense but breathable data tables, drag-and-drop pipeline management, instant search.
+3.  **Customer (The "Source"):**
+    * *Vibe:* Trust & Simplicity.
+    * *Key Emotion:* "This is easy and secure."
+    * *UX Priority:* Zero friction. A 3-step wizard to submit a referral.
+
+## 💎 The "2026 App" Aesthetic
+* **Visual Language:** "Deep Glass." Dark mode should feel like a cockpit. Light mode should feel like a fresh sheet of paper.
+* **Interaction:** Since this is a PWA, we need **Native-Like Physics**.
+    * Swipe-to-refresh on dashboards.
+    * Bottom sheets (drawers) instead of modals on mobile.
+    * Haptic feedback visuals (buttons "press" down).
+
+## 🛠 Tech Stack Directives
+* **Framework:** Next.js 16 (App Router).
+* **UI Library:** Introduce `shadcn/ui` for high-quality accessible components (Data Tables, Dialogs, Selects).
+* **Charts:** Use `recharts` for earnings graphs.
+* **Motion:** `framer-motion` for page transitions (slide-over effect).
