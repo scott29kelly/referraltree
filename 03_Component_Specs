@@ -1,0 +1,37 @@
+# 03_COMPONENT_SPECS.md
+
+## 1. Rep Dashboard (`/dashboard`)
+* **Header:** "Good Morning, [Name]." + Total Earnings ($$$) in huge font.
+* **The "Wallet" Card:**
+    * Visualizes "Pending Payouts" vs "Paid Out".
+    * Animated progress bar towards the next $250.
+* **Quick Actions:**
+    * **"Share My Link":** Opens a **Bottom Sheet** (Drawer) with the QR Code and "Copy Link" buttons.
+    * **"Add Referral":** Opens a full-screen form wizard.
+* **Referral List:**
+    * Mobile: Cards (Swipe left to call customer).
+    * Desktop: Clean data table.
+
+## 2. Admin Command Center (`/admin`)
+* **Layout:** Sidebar Navigation (collapsible).
+* **The "Pipeline" View:**
+    * A Kanban board (Columns: Submitted -> Contacted -> Quoted -> Sold).
+    * Drag and drop capability (optional) or quick status dropdowns.
+* **Rep Leaderboard:**
+    * Top 5 Reps by "Deals Closed".
+    * Sparkline charts showing activity trends.
+* **Filter/Search:** Global "Command K" style search bar to find any rep or customer instantly.
+
+## 3. Customer Referral Flow (`/refer`)
+* *This is the public-facing page.*
+* **Design:** Ultra-simple, high-trust.
+* **Hero:** "Refer a friend to Guardian. Get $250."
+* **Form:**
+    * Step 1: Your Info (Auto-filled if coming from Rep link).
+    * Step 2: Friend's Info.
+    * Step 3: Permission checkbox.
+* **Success State:** Full screen confetti animation + "We'll take it from here."
+
+## 4. Shared UI Elements
+* **Theme Toggle:** A small "switch" in the settings menu or navbar.
+* **Loading States:** Skeleton screens (shimmer effect) matching the card layout. Never show a spinning loader for the whole page.
