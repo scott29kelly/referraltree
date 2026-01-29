@@ -1,0 +1,32 @@
+# 04_EXECUTION_PLAN.md
+
+## Phase 1: Infrastructure & Theming
+1.  **Install Shadcn/UI:**
+    * Run `npx shadcn-ui@latest init`.
+    * Install core components: `card`, `table`, `sheet`, `dialog`, `input`, `button`, `avatar`.
+2.  **Tailwind Config:**
+    * Define the `colors` (Guardian Navy, Profit Green) in `tailwind.config.ts`.
+    * Set up CSS variables for the dark/light toggle in `globals.css`.
+3.  **Layout Refactor:**
+    * Create a `DashboardLayout` wrapper that handles the Sidebar (Desktop) and Bottom Nav (Mobile).
+
+## Phase 2: Role-Based UI Construction
+1.  **Rep Dashboard First:**
+    * Build the `EarningsCard` component (using Recharts or simple CSS bars).
+    * Implement the `QRCodeDrawer` (using Shadcn `Sheet`).
+2.  **Admin Panel Second:**
+    * Build the `ReferralTable` using `@tanstack/react-table` (via Shadcn).
+    * Implement row actions (Edit Status, Delete).
+3.  **Customer View Third:**
+    * Style the input forms with floating labels (Material design style) for a premium feel.
+
+## Phase 3: PWA & Polish
+1.  **Manifest Update:** Ensure `manifest.json` has the correct dark/light icons.
+2.  **Animations:**
+    * Add `framer-motion` to lists (`<AnimatePresence>`). New referrals should "pop" in.
+    * Add "Number Counting" animation for earnings (e.g., $0 -> $250).
+3.  **Offline Mode:** Verify the service worker caches the new assets so the App shell loads instantly offline.
+
+## Phase 4: Final Review
+1.  **The "Thumb Test":** Open on mobile. Can I reach the main buttons with one thumb?
+2.  **Dark Mode Audit:** Ensure graphs and tables are readable in deep dark mode.
