@@ -43,7 +43,8 @@ This document tracks the progressive enhancement of the Guardianship PWA UI/UX. 
 - [x] StatusBadge - Reusable status badge component
 - [x] Command Palette (for admin quick actions) - Session 4
 - [x] MobileSheet (mobile-first modals) - Session 4
-- [ ] Data Table (with sorting, filtering)
+- [x] Data Table (with sorting, filtering) - Session 4
+- [x] Select (accessible dropdown) - Session 4
 
 ---
 
@@ -257,11 +258,14 @@ CSS variables for Shadcn components will be added to globals.css while preservin
   - Guardian styling with handle, header, body, footer
   - MobileSheetActions for common button patterns
 - [x] Refactored AddReferralForm to use MobileSheet + Shadcn Input/Label
-- [x] Refactored AddRepModal to use Shadcn Input/Label
+- [x] Refactored AddRepModal to use Shadcn Input/Label/Select
+- [x] Created reusable DataTable component with sorting/filtering/pagination
+- [x] Added Shadcn Select component for accessible dropdowns
 - [x] Build verification passed
 
 **New Dependencies Added:**
 - react-day-picker (via Shadcn Calendar)
+- @radix-ui/react-select (via Shadcn Select)
 
 **Files Created:**
 - `src/components/ui/calendar.tsx` - Shadcn Calendar
@@ -269,15 +273,17 @@ CSS variables for Shadcn components will be added to globals.css while preservin
 - `src/hooks/usePWA.ts` - PWA state management hook
 - `src/components/ui/pwa-indicators.tsx` - PWA UI components
 - `src/components/ui/mobile-sheet.tsx` - Mobile bottom sheet component
+- `src/components/ui/data-table.tsx` - Reusable data table with sorting/filtering
+- `src/components/ui/select.tsx` - Shadcn Select dropdown
 
 **Files Modified:**
 - `src/components/ui/DateRangePicker.tsx` - Migrated to Shadcn Popover + Calendar
 - `src/app/admin/layout.tsx` - Added Command Palette
 - `src/app/dashboard/layout.tsx` - Added PWA indicators
 - `src/components/referral-tree/AddReferralForm.tsx` - Uses MobileSheet + Shadcn inputs
-- `src/components/admin/AddRepModal.tsx` - Uses Shadcn Input/Label
+- `src/components/admin/AddRepModal.tsx` - Uses Shadcn Input/Label/Select
 
-**Token Usage:** ~TBD tokens used (Session 4)
+**Token Usage:** ~75k tokens used (Session 4)
 
 ---
 

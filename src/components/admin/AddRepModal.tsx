@@ -14,6 +14,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { CreateRepInput, RepRole } from '@/types/database';
 
 interface AddRepModalProps {
@@ -151,28 +158,34 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
             <Label htmlFor="rep-role" className="text-slate-300">
               Role
             </Label>
-            <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                <Shield className="w-4 h-4 text-slate-500" />
-              </div>
-              <select
+            <Select
+              value={role}
+              onValueChange={(value) => setRole(value as RepRole)}
+              disabled={isLoading}
+            >
+              <SelectTrigger
                 id="rep-role"
-                value={role}
-                onChange={(e) => setRole(e.target.value as RepRole)}
-                disabled={isLoading}
                 className={cn(
-                  'w-full pl-11 pr-4 py-3 rounded-xl appearance-none cursor-pointer',
-                  'bg-slate-800/80 border border-slate-700/50',
-                  'text-white text-sm',
-                  'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50',
-                  'transition-all duration-200',
-                  'disabled:opacity-50'
+                  'w-full h-auto py-3 rounded-xl',
+                  'bg-slate-800/80 border-slate-700/50',
+                  'text-white',
+                  'focus:ring-emerald-500/50 focus:border-emerald-500/50'
                 )}
               >
-                <option value="rep">Rep</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+                <div className="flex items-center gap-3">
+                  <Shield className="w-4 h-4 text-slate-500" />
+                  <SelectValue placeholder="Select role" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-slate-700/50">
+                <SelectItem value="rep" className="text-slate-300 focus:bg-slate-800 focus:text-white">
+                  Rep
+                </SelectItem>
+                <SelectItem value="admin" className="text-slate-300 focus:bg-slate-800 focus:text-white">
+                  Admin
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <DialogFooter className="pt-3 gap-3 sm:gap-3">
