@@ -162,7 +162,7 @@ CSS variables for Shadcn components will be added to globals.css while preservin
 - `src/components/referral-tree/ReferralTree.tsx` - Uses new toast system
 - `src/app/layout.tsx` - Added Toaster component
 
-**Token Usage:** ~35k tokens used (cumulative)
+**Token Usage:** ~73k tokens used (Session 2 total)
 
 ---
 
