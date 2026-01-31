@@ -1,8 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Loader2, UserPlus, Mail, User, Shield } from 'lucide-react';
-import { clsx } from 'clsx';
+import { Loader2, UserPlus, Mail, User, Shield, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import type { CreateRepInput, RepRole } from '@/types/database';
 
 interface AddRepModalProps {
@@ -17,8 +26,6 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
   const [role, setRole] = useState<RepRole>('rep');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,41 +45,49 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={onClose}
-      />
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onClose();
+    }
+  };
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md rounded-2xl bg-gradient-to-br from-slate-900/95 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 shadow-2xl shadow-black/50 overflow-hidden">
-        {/* Decorative gradient */}
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent 
+        className={cn(
+          'bg-gradient-to-br from-slate-900/95 to-slate-900/90',
+          'backdrop-blur-xl border-slate-700/50',
+          'shadow-2xl shadow-black/50',
+          'p-0 gap-0 overflow-hidden'
+        )}
+        showCloseButton={false}
+      >
+        {/* Decorative gradient top bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500" />
 
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-700/50">
+        <DialogHeader className="p-5 pb-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center border border-emerald-500/20">
               <UserPlus className="w-5 h-5 text-emerald-400" />
             </div>
-            <h2 className="text-lg font-semibold text-white tracking-tight">Add New Rep</h2>
+            <div>
+              <DialogTitle className="text-lg font-semibold text-white tracking-tight">
+                Add New Rep
+              </DialogTitle>
+              <DialogDescription className="text-sm text-slate-400">
+                Create a new sales representative account
+              </DialogDescription>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        </DialogHeader>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-5">
           {error && (
             <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0">
-                <X className="w-4 h-4" />
+                <AlertCircle className="w-4 h-4" />
               </div>
               {error}
             </div>
@@ -94,7 +109,7 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
                 placeholder="John Doe"
                 required
                 disabled={isLoading}
-                className={clsx(
+                className={cn(
                   'w-full pl-11 pr-4 py-3 rounded-xl',
                   'bg-slate-800/80 border border-slate-700/50',
                   'text-white text-sm placeholder-slate-500',
@@ -122,7 +137,7 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
                 placeholder="john@guardian.com"
                 required
                 disabled={isLoading}
-                className={clsx(
+                className={cn(
                   'w-full pl-11 pr-4 py-3 rounded-xl',
                   'bg-slate-800/80 border border-slate-700/50',
                   'text-white text-sm placeholder-slate-500',
@@ -147,7 +162,7 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
                 value={role}
                 onChange={(e) => setRole(e.target.value as RepRole)}
                 disabled={isLoading}
-                className={clsx(
+                className={cn(
                   'w-full pl-11 pr-4 py-3 rounded-xl appearance-none cursor-pointer',
                   'bg-slate-800/80 border border-slate-700/50',
                   'text-white text-sm',
@@ -162,34 +177,32 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
             </div>
           </div>
 
-          <div className="flex gap-3 pt-3">
-            <button
+          <DialogFooter className="pt-3 gap-3 sm:gap-3">
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
               disabled={isLoading}
-              className={clsx(
-                'flex-1 py-3 px-4 rounded-xl',
-                'bg-slate-800/80 border border-slate-700/50',
-                'text-slate-300 font-medium text-sm',
-                'hover:bg-slate-700/80 hover:text-white',
-                'transition-all duration-200',
-                'disabled:opacity-50'
+              className={cn(
+                'flex-1 py-3 rounded-xl',
+                'bg-slate-800/80 border-slate-700/50',
+                'text-slate-300 hover:text-white hover:bg-slate-700/80',
+                'transition-all duration-200'
               )}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={isLoading}
-              className={clsx(
-                'flex-1 py-3 px-4 rounded-xl',
+              className={cn(
+                'flex-1 py-3 rounded-xl',
                 'bg-gradient-to-r from-emerald-500 to-emerald-600',
-                'text-white font-medium text-sm',
+                'text-white font-medium',
                 'shadow-lg shadow-emerald-500/25',
                 'hover:shadow-emerald-500/40 hover:scale-[1.02]',
                 'transition-all duration-200',
-                'disabled:opacity-50 disabled:hover:scale-100',
-                'flex items-center justify-center gap-2'
+                'disabled:opacity-50 disabled:hover:scale-100'
               )}
             >
               {isLoading ? (
@@ -200,10 +213,10 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
               ) : (
                 'Create Rep'
               )}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

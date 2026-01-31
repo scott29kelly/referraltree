@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DollarSign, Users, TrendingUp, Sparkles, Plus } from 'lucide-react';
 import ReferralNode, { ReferralNodeData, ReferralStatus } from './ReferralNode';
 import AddReferralForm from './AddReferralForm';
-import { ToastContainer, useToast } from '@/components/ui/Toast';
+import { toast } from '@/components/ui/Toast';
 import 'reactflow/dist/style.css';
 
 // Custom node types
@@ -160,7 +160,6 @@ function ReferralTreeInner({ referrals: initialReferrals = DEMO_REFERRALS }: Ref
   const [referrals, setReferrals] = useState<ReferralNodeData[]>(initialReferrals);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const { toasts, removeToast, success, celebration } = useToast();
 
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
     () => calculateTreeLayout(referrals),
@@ -187,11 +186,11 @@ function ReferralTreeInner({ referrals: initialReferrals = DEMO_REFERRALS }: Ref
     setReferrals((prev) => [...prev, newReferral]);
 
     // Show celebration toast
-    celebration(
-      '🎉 Referral Submitted!',
+    toast.celebration(
+      'Referral Submitted!',
       `${newReferral.name} has been added to your tree. Earn $250 when they close!`
     );
-  }, [celebration]);
+  }, []);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -218,9 +217,6 @@ function ReferralTreeInner({ referrals: initialReferrals = DEMO_REFERRALS }: Ref
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Toast Container */}
-      <ToastContainer toasts={toasts} onClose={removeToast} />
-
       {/* Stats Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}

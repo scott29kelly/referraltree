@@ -18,6 +18,18 @@ const badgeVariants = cva(
           "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
+        // Guardian Status Badges
+        submitted:
+          "bg-slate-600/80 text-slate-300 border-slate-500/30 shadow-lg shadow-slate-500/10",
+        contacted:
+          "bg-sky-600/80 text-sky-300 border-sky-500/30 shadow-lg shadow-sky-500/20",
+        quoted:
+          "bg-amber-600/80 text-amber-300 border-amber-500/30 shadow-lg shadow-amber-500/20",
+        sold:
+          "bg-emerald-600/80 text-emerald-300 border-emerald-500/30 shadow-lg shadow-emerald-500/20",
+        // Guardian Brand Badge
+        gold:
+          "bg-guardian-gold/20 text-guardian-gold border-guardian-gold/30 shadow-lg shadow-guardian-gold/10",
       },
     },
     defaultVariants: {

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, setAuthCookie } from '@/lib/auth';
 import { Shield, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -82,7 +84,13 @@ export default function LoginForm() {
                 placeholder="you@example.com"
                 required
                 disabled={isLoading}
-                className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent disabled:opacity-50 transition-all"
+                className={cn(
+                  'w-full pl-10 pr-4 py-3 rounded-lg',
+                  'bg-slate-900 border border-slate-700',
+                  'text-white placeholder-slate-500',
+                  'focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent',
+                  'disabled:opacity-50 transition-all'
+                )}
               />
             </div>
           </div>
@@ -104,16 +112,24 @@ export default function LoginForm() {
                 placeholder="Enter your password"
                 required
                 disabled={isLoading}
-                className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent disabled:opacity-50 transition-all"
+                className={cn(
+                  'w-full pl-10 pr-4 py-3 rounded-lg',
+                  'bg-slate-900 border border-slate-700',
+                  'text-white placeholder-slate-500',
+                  'focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent',
+                  'disabled:opacity-50 transition-all'
+                )}
               />
             </div>
           </div>
 
           {/* Submit Button */}
-          <button
+          <Button
             type="submit"
+            variant="gold"
+            size="lg"
             disabled={isLoading}
-            className="w-full py-3 px-4 rounded-lg bg-guardian-gold text-guardian-navy font-semibold hover:bg-guardian-gold/90 focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:ring-offset-2 focus:ring-offset-slate-950 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-lg"
           >
             {isLoading ? (
               <>
@@ -123,7 +139,7 @@ export default function LoginForm() {
             ) : (
               'Sign In'
             )}
-          </button>
+          </Button>
         </form>
 
         {/* Demo Credentials */}

@@ -19,6 +19,13 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Guardian Brand Variants
+        gold:
+          "bg-guardian-gold text-guardian-navy font-semibold hover:bg-guardian-gold/90 shadow-lg shadow-guardian-gold/25 hover:shadow-guardian-gold/40 focus-visible:ring-guardian-gold/50",
+        emerald:
+          "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-[0.98]",
+        "emerald-outline":
+          "border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
