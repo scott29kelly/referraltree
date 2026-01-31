@@ -12,6 +12,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { CreateRepInput, RepRole } from '@/types/database';
 
 interface AddRepModalProps {
@@ -93,16 +95,16 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
             </div>
           )}
 
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
+          <div className="space-y-2">
+            <Label htmlFor="rep-name" className="text-slate-300">
               Full Name
-            </label>
+            </Label>
             <div className="relative">
               <div className="absolute left-4 top-1/2 -translate-y-1/2">
                 <User className="w-4 h-4 text-slate-500" />
               </div>
-              <input
-                id="name"
+              <Input
+                id="rep-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -110,27 +112,25 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
                 required
                 disabled={isLoading}
                 className={cn(
-                  'w-full pl-11 pr-4 py-3 rounded-xl',
-                  'bg-slate-800/80 border border-slate-700/50',
-                  'text-white text-sm placeholder-slate-500',
-                  'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50',
-                  'transition-all duration-200',
-                  'disabled:opacity-50'
+                  'pl-11 py-3 h-auto rounded-xl',
+                  'bg-slate-800/80 border-slate-700/50',
+                  'text-white placeholder-slate-500',
+                  'focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50'
                 )}
               />
             </div>
           </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
+          <div className="space-y-2">
+            <Label htmlFor="rep-email" className="text-slate-300">
               Email Address
-            </label>
+            </Label>
             <div className="relative">
               <div className="absolute left-4 top-1/2 -translate-y-1/2">
                 <Mail className="w-4 h-4 text-slate-500" />
               </div>
-              <input
-                id="email"
+              <Input
+                id="rep-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -138,27 +138,25 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
                 required
                 disabled={isLoading}
                 className={cn(
-                  'w-full pl-11 pr-4 py-3 rounded-xl',
-                  'bg-slate-800/80 border border-slate-700/50',
-                  'text-white text-sm placeholder-slate-500',
-                  'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50',
-                  'transition-all duration-200',
-                  'disabled:opacity-50'
+                  'pl-11 py-3 h-auto rounded-xl',
+                  'bg-slate-800/80 border-slate-700/50',
+                  'text-white placeholder-slate-500',
+                  'focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50'
                 )}
               />
             </div>
           </div>
 
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-slate-300 mb-2">
+          <div className="space-y-2">
+            <Label htmlFor="rep-role" className="text-slate-300">
               Role
-            </label>
+            </Label>
             <div className="relative">
               <div className="absolute left-4 top-1/2 -translate-y-1/2">
                 <Shield className="w-4 h-4 text-slate-500" />
               </div>
               <select
-                id="role"
+                id="rep-role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as RepRole)}
                 disabled={isLoading}
@@ -194,20 +192,16 @@ export default function AddRepModal({ isOpen, onClose, onSubmit }: AddRepModalPr
             </Button>
             <Button
               type="submit"
+              variant="emerald"
               disabled={isLoading}
               className={cn(
                 'flex-1 py-3 rounded-xl',
-                'bg-gradient-to-r from-emerald-500 to-emerald-600',
-                'text-white font-medium',
-                'shadow-lg shadow-emerald-500/25',
-                'hover:shadow-emerald-500/40 hover:scale-[1.02]',
-                'transition-all duration-200',
-                'disabled:opacity-50 disabled:hover:scale-100'
+                'transition-all duration-200'
               )}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   Creating...
                 </>
               ) : (

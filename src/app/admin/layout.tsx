@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRequireAdmin } from '@/hooks/useAuth';
 import { PageTransition } from '@/components/ui/page-transition';
+import CommandPalette from '@/components/admin/CommandPalette';
 import {
   Shield,
   Home,
@@ -97,8 +98,13 @@ export default function AdminLayout({
             </button>
           </div>
 
+          {/* Command Palette - Desktop */}
+          <div className="px-4 py-3 hidden lg:block">
+            <CommandPalette onSignOut={signOut} />
+          </div>
+
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-5 space-y-1.5">
+          <nav className="flex-1 px-4 py-2 space-y-1.5">
             {navItems.map((item) => {
               const isActive =
                 pathname === item.href ||
@@ -174,6 +180,9 @@ export default function AdminLayout({
                 <Shield className="w-5 h-5 text-emerald-400" />
               </div>
               <span className="font-semibold text-white">Admin</span>
+            </div>
+            <div className="ml-auto">
+              <CommandPalette onSignOut={signOut} />
             </div>
           </div>
         </header>

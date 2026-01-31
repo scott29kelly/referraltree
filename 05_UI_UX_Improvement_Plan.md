@@ -36,13 +36,13 @@ This document tracks the progressive enhancement of the Guardianship PWA UI/UX. 
 ### Priority Components Migrated
 1. [x] **AddRepModal** → Shadcn Dialog
 2. [x] **Toast** → Shadcn Sonner
-3. [ ] **DateRangePicker** → Shadcn Popover + Calendar (future)
+3. [x] **DateRangePicker** → Shadcn Popover + Calendar (Session 4)
 4. [x] **Buttons** → Shadcn Button with Guardian variants (gold, emerald)
 
 ### New Components Created
 - [x] StatusBadge - Reusable status badge component
-- [ ] Command Palette (for admin quick actions)
-- [ ] Bottom Sheet (mobile-first modals)
+- [x] Command Palette (for admin quick actions) - Session 4
+- [x] MobileSheet (mobile-first modals) - Session 4
 - [ ] Data Table (with sorting, filtering)
 
 ---
@@ -59,10 +59,11 @@ This document tracks the progressive enhancement of the Guardianship PWA UI/UX. 
 - [x] Input, Textarea, Label components
 - [x] Popover component (for future DateRangePicker)
 
-### PWA Enhancements (Future)
-- [ ] Offline data sync indicators
-- [ ] Install prompt optimization
-- [ ] Push notification UI
+### PWA Enhancements (Session 4)
+- [x] Offline data sync indicators (OfflineBanner, OfflineIndicator)
+- [x] Install prompt optimization (InstallPrompt component)
+- [x] usePWA hook for state management
+- [ ] Push notification UI (future)
 
 ---
 
@@ -226,6 +227,57 @@ CSS variables for Shadcn components will be added to globals.css while preservin
 - `src/components/dashboard/ReferralTable.tsx` - Uses NoReferralsEmpty
 
 **Token Usage:** ~95k tokens used (Session 3 total)
+
+---
+
+### Session 4 - 2026-01-31
+**Focus:** Phase 4 - Advanced Components & PWA Enhancements
+
+**Status:** Completed
+
+**Completed:**
+- [x] Installed Shadcn Calendar component (react-day-picker)
+- [x] Migrated DateRangePicker to use Shadcn Popover + Calendar
+  - Cleaner implementation with date range selection
+  - Preset options preserved (Today, This Week, etc.)
+  - Custom range calendar view
+- [x] Created Admin Command Palette with quick actions
+  - Triggered by ⌘K / Ctrl+K keyboard shortcut
+  - Navigation, quick actions, and account sections
+  - Integrated into admin layout (sidebar and mobile header)
+- [x] Created PWA offline/install components
+  - usePWA hook for PWA state management
+  - OfflineIndicator - compact status indicator
+  - OfflineBanner - full-width banner for offline status
+  - InstallPrompt - banner/card/toast variants for install prompt
+  - NetworkStatusIndicator - simple online/offline dot
+  - Integrated into dashboard layout
+- [x] Created reusable MobileSheet component
+  - Mobile-first bottom sheet pattern using Shadcn Sheet
+  - Guardian styling with handle, header, body, footer
+  - MobileSheetActions for common button patterns
+- [x] Refactored AddReferralForm to use MobileSheet + Shadcn Input/Label
+- [x] Refactored AddRepModal to use Shadcn Input/Label
+- [x] Build verification passed
+
+**New Dependencies Added:**
+- react-day-picker (via Shadcn Calendar)
+
+**Files Created:**
+- `src/components/ui/calendar.tsx` - Shadcn Calendar
+- `src/components/admin/CommandPalette.tsx` - Admin command palette
+- `src/hooks/usePWA.ts` - PWA state management hook
+- `src/components/ui/pwa-indicators.tsx` - PWA UI components
+- `src/components/ui/mobile-sheet.tsx` - Mobile bottom sheet component
+
+**Files Modified:**
+- `src/components/ui/DateRangePicker.tsx` - Migrated to Shadcn Popover + Calendar
+- `src/app/admin/layout.tsx` - Added Command Palette
+- `src/app/dashboard/layout.tsx` - Added PWA indicators
+- `src/components/referral-tree/AddReferralForm.tsx` - Uses MobileSheet + Shadcn inputs
+- `src/components/admin/AddRepModal.tsx` - Uses Shadcn Input/Label
+
+**Token Usage:** ~TBD tokens used (Session 4)
 
 ---
 
