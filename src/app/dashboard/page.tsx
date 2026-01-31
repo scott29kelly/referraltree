@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { getDashboardStats, getActivitiesByRep, getReferralsByRep } from '@/lib/data';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ActivityFeed from '@/components/dashboard/ActivityFeed';
+import { DashboardPageSkeleton } from '@/components/ui/skeletons';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Users, Clock, CheckCircle, DollarSign, QrCode, ArrowRight, Network } from 'lucide-react';
 import type { DashboardStats, Activity, Referral } from '@/types/database';
 
@@ -70,16 +72,7 @@ export default function DashboardPage() {
   }, [rep]);
 
   if (isLoading || loading) {
-    return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-8 bg-slate-800 rounded w-64" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 bg-slate-800 rounded-xl" />
-          ))}
-        </div>
-      </div>
-    );
+    return <DashboardPageSkeleton />;
   }
 
   return (
@@ -200,19 +193,7 @@ export default function DashboardPage() {
                       {new Date(referral.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      referral.status === 'sold'
-                        ? 'bg-emerald-600 text-emerald-300'
-                        : referral.status === 'quoted'
-                        ? 'bg-amber-600 text-amber-300'
-                        : referral.status === 'contacted'
-                        ? 'bg-sky-600 text-sky-300'
-                        : 'bg-slate-600 text-slate-300'
-                    }`}
-                  >
-                    {referral.status}
-                  </span>
+                  <StatusBadge status={referral.status} />
                 </div>
               ))}
             </div>
