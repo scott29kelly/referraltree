@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRequireAdmin } from '@/hooks/useAuth';
+import { PageTransition } from '@/components/ui/page-transition';
 import {
   Shield,
   Home,
@@ -178,7 +179,9 @@ export default function AdminLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </div>
     </div>
   );
