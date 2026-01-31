@@ -5,6 +5,8 @@ import { getReferrals, getCustomers, getReps, updateReferralStatus } from '@/lib
 import BulkActions from '@/components/admin/BulkActions';
 import ExportButton from '@/components/admin/ExportButton';
 import DateRangePicker from '@/components/ui/DateRangePicker';
+import { TableSkeleton } from '@/components/ui/skeletons';
+import { NoSearchResultsEmpty } from '@/components/ui/empty-state';
 import {
   Search,
   ChevronDown,
@@ -256,27 +258,19 @@ export default function AdminReferralsPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        {/* Skeleton Header */}
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="h-8 w-48 bg-slate-800/80 rounded-xl animate-pulse" />
-            <div className="h-4 w-64 bg-slate-800/60 rounded-lg animate-pulse" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center border border-emerald-500/20">
+              <FileText className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">All Referrals</h1>
+              <p className="text-slate-400">Loading referrals...</p>
+            </div>
           </div>
-          <div className="h-10 w-32 bg-slate-800/80 rounded-xl animate-pulse" />
         </div>
-        {/* Skeleton Filters */}
-        <div className="flex gap-4">
-          <div className="h-11 w-64 bg-slate-800/80 rounded-xl animate-pulse" />
-          <div className="h-11 w-36 bg-slate-800/80 rounded-xl animate-pulse" />
-          <div className="h-11 w-44 bg-slate-800/80 rounded-xl animate-pulse" />
-        </div>
-        {/* Skeleton Table */}
-        <div className="rounded-2xl bg-slate-800/30 backdrop-blur-sm border border-slate-700/30 overflow-hidden">
-          <div className="h-12 bg-slate-800/50 border-b border-slate-700/30" />
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-16 border-b border-slate-700/20 animate-pulse" style={{ animationDelay: `${i * 50}ms` }} />
-          ))}
-        </div>
+        <TableSkeleton rows={8} columns={6} />
       </div>
     );
   }
@@ -503,13 +497,15 @@ export default function AdminReferralsPage() {
         </div>
 
         {filteredReferrals.length === 0 && (
-          <div className="p-12 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-800/50 flex items-center justify-center">
-              <Search className="w-8 h-8 text-slate-500" />
-            </div>
-            <p className="text-slate-400 font-medium">No referrals found</p>
-            <p className="text-slate-500 text-sm mt-1">Try adjusting your filters</p>
-          </div>
+          <NoSearchResultsEmpty
+            query={searchQuery}
+            onClear={() => {
+              setSearchQuery('');
+              setStatusFilter('all');
+              setDateRange({ start: '', end: '' });
+            }}
+            className="py-8"
+          />
         )}
 
         <div className="px-4 py-3 border-t border-slate-700/30 bg-slate-800/30 text-sm text-slate-400 flex items-center justify-between">

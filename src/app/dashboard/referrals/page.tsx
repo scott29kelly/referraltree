@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getReferralsByRep, getCustomersByRep, updateReferralStatus } from '@/lib/data';
 import ReferralTable from '@/components/dashboard/ReferralTable';
+import { TableSkeleton, DashboardStatsSkeleton } from '@/components/ui/skeletons';
 import type { Referral, Customer, ReferralStatus } from '@/types/database';
 
 export default function ReferralsPage() {
@@ -92,8 +93,12 @@ export default function ReferralsPage() {
   if (authLoading || loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-slate-800 rounded w-48 animate-pulse" />
-        <div className="h-96 bg-slate-800 rounded-xl animate-pulse" />
+        <div>
+          <h1 className="text-2xl font-bold text-white">Referrals</h1>
+          <p className="text-slate-400 mt-1">Loading your referrals...</p>
+        </div>
+        <DashboardStatsSkeleton />
+        <TableSkeleton rows={5} columns={4} />
       </div>
     );
   }
