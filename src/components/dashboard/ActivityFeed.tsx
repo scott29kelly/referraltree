@@ -2,6 +2,7 @@
 
 import { clsx } from 'clsx';
 import { UserPlus, RefreshCw, CheckCircle } from 'lucide-react';
+import { NoActivityEmpty } from '@/components/ui/empty-state';
 import type { Activity } from '@/types/database';
 
 interface ActivityFeedProps {
@@ -54,7 +55,7 @@ export default function ActivityFeed({ activities, className }: ActivityFeedProp
     return (
       <div className={clsx('rounded-xl bg-slate-800/50 border border-slate-700/50 p-6', className)}>
         <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-        <p className="text-slate-400 text-center py-8">No recent activity</p>
+        <NoActivityEmpty className="py-4" />
       </div>
     );
   }

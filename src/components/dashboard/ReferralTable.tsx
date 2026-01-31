@@ -10,8 +10,8 @@ import {
   Calendar,
   User,
   StickyNote,
-  FileText,
 } from 'lucide-react';
+import { NoReferralsEmpty } from '@/components/ui/empty-state';
 import type { Referral, ReferralStatus } from '@/types/database';
 
 interface ReferralTableProps {
@@ -152,18 +152,12 @@ export default function ReferralTable({
       <div
         className={clsx(
           'rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-800/30',
-          'backdrop-blur-sm border border-slate-700/40 p-12 text-center',
+          'backdrop-blur-sm border border-slate-700/40',
           'shadow-2xl shadow-black/20',
           className
         )}
       >
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center border border-slate-600/30">
-          <FileText className="w-8 h-8 text-slate-500" />
-        </div>
-        <p className="text-slate-400 font-medium mb-1">No referrals found</p>
-        <p className="text-slate-500 text-sm">
-          Referrals will appear here once submitted
-        </p>
+        <NoReferralsEmpty className="py-8" />
       </div>
     );
   }
