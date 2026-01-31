@@ -266,6 +266,10 @@ CSS variables for Shadcn components will be added to globals.css while preservin
 **New Dependencies Added:**
 - react-day-picker (via Shadcn Calendar)
 - @radix-ui/react-select (via Shadcn Select)
+- @radix-ui/react-tooltip (via Shadcn Tooltip)
+- @radix-ui/react-switch (via Shadcn Switch)
+- @radix-ui/react-dropdown-menu (via Shadcn DropdownMenu)
+- @radix-ui/react-progress (via Shadcn Progress)
 
 **Files Created:**
 - `src/components/ui/calendar.tsx` - Shadcn Calendar
@@ -275,6 +279,10 @@ CSS variables for Shadcn components will be added to globals.css while preservin
 - `src/components/ui/mobile-sheet.tsx` - Mobile bottom sheet component
 - `src/components/ui/data-table.tsx` - Reusable data table with sorting/filtering
 - `src/components/ui/select.tsx` - Shadcn Select dropdown
+- `src/components/ui/tooltip.tsx` - Shadcn Tooltip
+- `src/components/ui/switch.tsx` - Shadcn Switch toggle
+- `src/components/ui/dropdown-menu.tsx` - Shadcn Dropdown Menu
+- `src/components/ui/progress.tsx` - Shadcn Progress bar
 
 **Files Modified:**
 - `src/components/ui/DateRangePicker.tsx` - Migrated to Shadcn Popover + Calendar
