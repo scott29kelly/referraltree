@@ -1,8 +1,13 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { Calendar, ChevronDown, X } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { clsx } from 'clsx';
 
 interface DateRange {
@@ -10,106 +15,23 @@ interface DateRange {
   end: string;
 }
 
-interface Preset {
-  label: string;
-  getValue: () => DateRange;
-}
-
 interface DateRangePickerProps {
-  value: DateRange;
-  onChange: (range: DateRange) => void;
+  value?: DateRange;
+  onChange?: (range: DateRange) => void;
   className?: string;
 }
 
-function getToday(): string {
-  return new Date().toISOString().split('T')[0];
-}
-
-function getDateOffset(days: number): string {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return date.toISOString().split('T')[0];
-}
-
-function getStartOfWeek(): string {
-  const date = new Date();
-  const day = date.getDay();
-  date.setDate(date.getDate() - day);
-  return date.toISOString().split('T')[0];
-}
-
-function getStartOfMonth(): string {
-  const date = new Date();
-  return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
-}
-
-function getStartOfQuarter(): string {
-  const date = new Date();
-  const quarter = Math.floor(date.getMonth() / 3);
-  return new Date(date.getFullYear(), quarter * 3, 1).toISOString().split('T')[0];
-}
-
-function getStartOfYear(): string {
-  const date = new Date();
-  return new Date(date.getFullYear(), 0, 1).toISOString().split('T')[0];
-}
-
-const presets: Preset[] = [
-  {
-    label: 'Today',
-    getValue: () => ({ start: getToday(), end: getToday() }),
-  },
-  {
-    label: 'This Week',
-    getValue: () => ({ start: getStartOfWeek(), end: getToday() }),
-  },
-  {
-    label: 'This Month',
-    getValue: () => ({ start: getStartOfMonth(), end: getToday() }),
-  },
-  {
-    label: 'This Quarter',
-    getValue: () => ({ start: getStartOfQuarter(), end: getToday() }),
-  },
-  {
-    label: 'This Year',
-    getValue: () => ({ start: getStartOfYear(), end: getToday() }),
-  },
-  {
-    label: 'Last 7 Days',
-    getValue: () => ({ start: getDateOffset(-6), end: getToday() }),
-  },
-  {
-    label: 'Last 30 Days',
-    getValue: () => ({ start: getDateOffset(-29), end: getToday() }),
-  },
-  {
-    label: 'Last 90 Days',
-    getValue: () => ({ start: getDateOffset(-89), end: getToday() }),
-  },
-  {
-    label: 'All Time',
-    getValue: () => ({ start: '', end: '' }),
-  },
+const presets = [
+  { label: 'Today', days: 0 },
+  { label: 'Last 7 days', days: 7 },
+  { label: 'Last 30 days', days: 30 },
+  { label: 'Last 90 days', days: 90 },
+  { label: 'This year', days: 365 },
+  { label: 'All time', days: -1 },
 ];
 
-function formatDateDisplay(date: string): string {
-  if (!date) return '';
-  return new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
-function getActivePreset(value: DateRange): string | null {
-  for (const preset of presets) {
-    const presetValue = preset.getValue();
-    if (presetValue.start === value.start && presetValue.end === value.end) {
-      return preset.label;
-    }
-  }
-  return null;
+function formatDateString(date: Date): string {
+  return date.toISOString().split('T')[0];
 }
 
 export default function DateRangePicker({
@@ -117,234 +39,113 @@ export default function DateRangePicker({
   onChange,
   className,
 }: DateRangePickerProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showCustom, setShowCustom] = useState(false);
-  const [customStart, setCustomStart] = useState(value.start);
-  const [customEnd, setCustomEnd] = useState(value.end);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<string>('All time');
 
-  const activePreset = getActivePreset(value);
+  const handlePresetClick = (preset: typeof presets[0]) => {
+    if (preset.days === -1) {
+      // All time - clear the filter
+      onChange?.({ start: '', end: '' });
+      setSelectedPreset(preset.label);
+      setOpen(false);
+      return;
+    }
 
-  // Update dropdown position when opened
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPos({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - preset.days);
+
+    setSelectedPreset(preset.label);
+    onChange?.({
+      start: formatDateString(start),
+      end: formatDateString(end),
+    });
+    setOpen(false);
+  };
+
+  const formatDateRange = () => {
+    if (!value?.start && !value?.end) return selectedPreset;
+    if (!value?.start || !value?.end) return selectedPreset;
+    
+    const formatDate = (dateStr: string) => {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
       });
-    }
-  }, [isOpen]);
+    };
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as Node;
-      const clickedInButton = containerRef.current?.contains(target);
-      const clickedInDropdown = dropdownRef.current?.contains(target);
-      if (!clickedInButton && !clickedInDropdown) {
-        setIsOpen(false);
-        setShowCustom(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handlePresetClick = (preset: Preset) => {
-    onChange(preset.getValue());
-    setIsOpen(false);
-    setShowCustom(false);
-  };
-
-  const handleCustomApply = () => {
-    onChange({ start: customStart, end: customEnd });
-    setIsOpen(false);
-    setShowCustom(false);
-  };
-
-  const handleClear = () => {
-    onChange({ start: '', end: '' });
-    setCustomStart('');
-    setCustomEnd('');
-  };
-
-  const displayText = () => {
-    if (!value.start && !value.end) {
-      return 'All Time';
-    }
-    if (activePreset && activePreset !== 'All Time') {
-      return activePreset;
-    }
-    const start = formatDateDisplay(value.start);
-    const end = formatDateDisplay(value.end);
-    if (start === end) return start;
-    return `${start} - ${end}`;
+    return `${formatDate(value.start)} - ${formatDate(value.end)}`;
   };
 
   return (
-    <div ref={containerRef} className={clsx('relative', className)}>
-      {/* Trigger Button */}
-      <button
-        ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
-        className={clsx(
-          'flex items-center gap-2 px-4 py-2.5 rounded-xl',
-          'bg-slate-800/80 backdrop-blur-sm border border-slate-700/50',
-          'text-white text-sm font-medium',
-          'hover:bg-slate-700/80 hover:border-slate-600/50',
-          'focus:outline-none focus:ring-2 focus:ring-emerald-500/50',
-          'transition-all duration-200',
-          isOpen && 'ring-2 ring-emerald-500/50 border-emerald-500/50'
-        )}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className={clsx(
+            'justify-start text-left font-normal min-w-[180px]',
+            'bg-slate-800/50 border-slate-700 hover:bg-slate-800 hover:border-slate-600',
+            'text-slate-300',
+            className
+          )}
+        >
+          <Calendar className="mr-2 h-4 w-4 text-slate-400" />
+          <span className="truncate">{formatDateRange()}</span>
+          <ChevronDown className="ml-auto h-4 w-4 text-slate-400 flex-shrink-0" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-auto p-0 bg-slate-900 border-slate-700"
+        align="start"
       >
-        <Calendar className="w-4 h-4 text-emerald-400" />
-        <span className="min-w-[120px] text-left">{displayText()}</span>
-        <ChevronDown
-          className={clsx(
-            'w-4 h-4 text-slate-400 transition-transform duration-200',
-            isOpen && 'rotate-180'
-          )}
-        />
-      </button>
-
-      {/* Selected Range Badge (when filtered) */}
-      {(value.start || value.end) && (
-        <button
-          onClick={handleClear}
-          className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center transition-colors"
-          title="Clear filter"
-        >
-          <X className="w-3 h-3 text-white" />
-        </button>
-      )}
-
-      {/* Dropdown via Portal */}
-      {isOpen && typeof document !== 'undefined' && createPortal(
-        <div
-          ref={dropdownRef}
-          className={clsx(
-            'fixed z-[9999]',
-            'min-w-[280px] p-2 rounded-2xl',
-            'bg-slate-900 backdrop-blur-xl',
-            'border border-slate-700/50',
-            'shadow-2xl shadow-black/40',
-            'animate-[fade-in_0.15s_ease-out]'
-          )}
-          style={{ top: dropdownPos.top, left: dropdownPos.left }}
-        >
-          {!showCustom ? (
-            <>
-              {/* Preset Options */}
-              <div className="grid grid-cols-2 gap-1.5 mb-2">
-                {presets.slice(0, 8).map((preset) => (
-                  <button
-                    key={preset.label}
-                    onClick={() => handlePresetClick(preset)}
-                    className={clsx(
-                      'px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200',
-                      activePreset === preset.label
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : 'bg-slate-800/50 text-slate-300 border border-transparent hover:bg-slate-700/50 hover:text-white'
-                    )}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* All Time Button */}
-              <button
-                onClick={() => handlePresetClick(presets[8])}
-                className={clsx(
-                  'w-full px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 mb-2',
-                  activePreset === 'All Time'
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-slate-800/50 text-slate-300 border border-transparent hover:bg-slate-700/50 hover:text-white'
-                )}
-              >
-                All Time
-              </button>
-
-              {/* Divider */}
-              <div className="h-px bg-slate-700/50 my-2" />
-
-              {/* Custom Range Button */}
-              <button
-                onClick={() => {
-                  setCustomStart(value.start);
-                  setCustomEnd(value.end);
-                  setShowCustom(true);
-                }}
-                className="w-full px-3 py-2 rounded-xl text-sm font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-700/50 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                <Calendar className="w-4 h-4" />
-                Custom Range
-              </button>
-            </>
-          ) : (
-            <>
-              {/* Custom Range Picker */}
-              <div className="space-y-3 p-1">
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    value={customStart}
-                    onChange={(e) => setCustomStart(e.target.value)}
-                    className={clsx(
-                      'w-full px-3 py-2 rounded-xl text-sm',
-                      'bg-slate-800/80 border border-slate-700/50',
-                      'text-white placeholder-slate-500',
-                      'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50',
-                      'transition-all duration-200'
-                    )}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    value={customEnd}
-                    onChange={(e) => setCustomEnd(e.target.value)}
-                    className={clsx(
-                      'w-full px-3 py-2 rounded-xl text-sm',
-                      'bg-slate-800/80 border border-slate-700/50',
-                      'text-white placeholder-slate-500',
-                      'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50',
-                      'transition-all duration-200'
-                    )}
-                  />
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={() => setShowCustom(false)}
-                    className="flex-1 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-200"
-                  >
-                    Back
-                  </button>
-                  <button
-                    onClick={handleCustomApply}
-                    className="flex-1 px-3 py-2 rounded-xl text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 transition-all duration-200"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
-        </div>,
-        document.body
-      )}
-    </div>
+        <div className="p-3 space-y-1">
+          <p className="text-xs font-medium text-slate-400 px-2 py-1">
+            Select range
+          </p>
+          {presets.map((preset) => (
+            <button
+              key={preset.label}
+              onClick={() => handlePresetClick(preset)}
+              className={clsx(
+                'w-full text-left px-3 py-2 rounded-lg text-sm transition-colors',
+                selectedPreset === preset.label
+                  ? 'bg-emerald-500/20 text-emerald-400'
+                  : 'text-slate-300 hover:bg-slate-800'
+              )}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+        
+        {/* Custom date inputs */}
+        <div className="border-t border-slate-800 p-3">
+          <p className="text-xs font-medium text-slate-400 px-2 py-1 mb-2">
+            Custom range
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={value?.start || ''}
+              onChange={(e) => {
+                onChange?.({ start: e.target.value, end: value?.end || '' });
+                setSelectedPreset('Custom');
+              }}
+              className="flex-1 px-2 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            />
+            <input
+              type="date"
+              value={value?.end || ''}
+              onChange={(e) => {
+                onChange?.({ start: value?.start || '', end: e.target.value });
+                setSelectedPreset('Custom');
+              }}
+              className="flex-1 px-2 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            />
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
