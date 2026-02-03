@@ -2,53 +2,65 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getAdminStats, getRepsWithStats, getActivities } from '@/lib/data';
+import { getAdminStats, getRepsWithStats, getActivities, getReferrals, getCustomers } from '@/lib/data';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ActivityFeed from '@/components/dashboard/ActivityFeed';
+import { PipelineKanban } from '@/components/admin/PipelineKanban';
 import { AdminPageSkeleton } from '@/components/ui/skeletons';
-import { Users, TrendingUp, DollarSign, CheckCircle, ArrowRight, Trophy } from 'lucide-react';
-import type { AdminStats, RepWithStats, Activity } from '@/types/database';
+import { Users, TrendingUp, DollarSign, CheckCircle, ArrowRight, Trophy, Kanban } from 'lucide-react';
+import type { AdminStats, RepWithStats, Activity, Referral, Customer, ReferralStatus } from '@/types/database';
 
 export default function AdminHomePage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [topReps, setTopReps] = useState<RepWithStats[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [customerMap, setCustomerMap] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [statsData, repsData, activitiesData] = await Promise.all([
+        const [statsData, repsData, activitiesData, referralsData, customersData] = await Promise.all([
           getAdminStats(),
           getRepsWithStats(),
           getActivities(5),
+          getReferrals(),
+          getCustomers(),
         ]);
 
         // Fetch API referrals to update stats
-        let apiReferralsCount = 0;
-        let apiSubmitted = 0;
+        let apiReferrals: Referral[] = [];
         try {
           const response = await fetch('/api/referrals');
           if (response.ok) {
             const data = await response.json();
-            const apiReferrals = data.referrals || [];
-            apiReferralsCount = apiReferrals.length;
-            apiSubmitted = apiReferrals.filter((r: { status: string }) => r.status === 'submitted').length;
+            apiReferrals = data.referrals || [];
           }
         } catch (err) {
           console.error('Error fetching API referrals:', err);
         }
 
+        const apiSubmitted = apiReferrals.filter((r) => r.status === 'submitted').length;
+
         // Update stats with API referrals
         const updatedStats = {
           ...statsData,
-          total_referrals: statsData.total_referrals + apiReferralsCount,
+          total_referrals: statsData.total_referrals + apiReferrals.length,
           submitted: statsData.submitted + apiSubmitted,
           pending_earnings: statsData.pending_earnings + (apiSubmitted * 250),
         };
 
+        // Build customer map for kanban
+        const custMap = new Map<string, string>();
+        customersData.forEach((c: Customer) => custMap.set(c.id, c.name));
+
+        // Combine referrals
+        const allReferrals = [...apiReferrals, ...referralsData].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+
         setStats(updatedStats);
-        // Sort by earnings and take top 5
         setTopReps(
           repsData
             .filter((r) => r.active)
@@ -56,6 +68,8 @@ export default function AdminHomePage() {
             .slice(0, 5)
         );
         setActivities(activitiesData);
+        setReferrals(allReferrals);
+        setCustomerMap(custMap);
       } catch (error) {
         console.error('Error loading admin data:', error);
       } finally {
@@ -65,6 +79,20 @@ export default function AdminHomePage() {
 
     loadData();
   }, []);
+
+  const handleStatusChange = async (id: string, newStatus: ReferralStatus) => {
+    // Optimistic update
+    setReferrals((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
+    );
+
+    // TODO: Persist to backend
+    // try {
+    //   await updateReferralStatus(id, newStatus);
+    // } catch (error) {
+    //   // Revert on failure
+    // }
+  };
 
   if (loading) {
     return <AdminPageSkeleton />;
@@ -107,83 +135,25 @@ export default function AdminHomePage() {
         />
       </div>
 
-      {/* Pipeline Overview */}
-      <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Pipeline Status</h3>
-        <div className="grid grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-slate-300">
-              {stats?.submitted || 0}
-            </div>
-            <div className="text-sm text-slate-400 mt-1">Submitted</div>
-            <div className="h-2 mt-2 bg-slate-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-slate-500 rounded-full transition-all"
-                style={{
-                  width: `${
-                    stats?.total_referrals
-                      ? ((stats.submitted / stats.total_referrals) * 100)
-                      : 0
-                  }%`,
-                }}
-              />
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-sky-400">
-              {stats?.contacted || 0}
-            </div>
-            <div className="text-sm text-slate-400 mt-1">Contacted</div>
-            <div className="h-2 mt-2 bg-slate-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-sky-500 rounded-full transition-all"
-                style={{
-                  width: `${
-                    stats?.total_referrals
-                      ? ((stats.contacted / stats.total_referrals) * 100)
-                      : 0
-                  }%`,
-                }}
-              />
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-amber-400">
-              {stats?.quoted || 0}
-            </div>
-            <div className="text-sm text-slate-400 mt-1">Quoted</div>
-            <div className="h-2 mt-2 bg-slate-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-amber-500 rounded-full transition-all"
-                style={{
-                  width: `${
-                    stats?.total_referrals
-                      ? ((stats.quoted / stats.total_referrals) * 100)
-                      : 0
-                  }%`,
-                }}
-              />
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-emerald-400">
-              {stats?.sold || 0}
-            </div>
-            <div className="text-sm text-slate-400 mt-1">Sold</div>
-            <div className="h-2 mt-2 bg-slate-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 rounded-full transition-all"
-                style={{
-                  width: `${
-                    stats?.total_referrals
-                      ? ((stats.sold / stats.total_referrals) * 100)
-                      : 0
-                  }%`,
-                }}
-              />
-            </div>
-          </div>
+      {/* Pipeline Kanban */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <Kanban className="w-5 h-5 text-emerald-400" />
+            Pipeline
+          </h2>
+          <Link
+            href="/admin/referrals"
+            className="text-sm text-emerald-400 hover:underline"
+          >
+            View all referrals →
+          </Link>
         </div>
+        <PipelineKanban
+          referrals={referrals}
+          onStatusChange={handleStatusChange}
+          customerMap={customerMap}
+        />
       </div>
 
       {/* Quick Actions */}

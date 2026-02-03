@@ -1,14 +1,33 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import { getRep, getCustomersByRep } from '@/lib/data';
-import { Shield, User, Phone, Mail, FileText, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Shield,
+  User,
+  Phone,
+  Mail,
+  FileText,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  ArrowRight,
+  ArrowLeft,
+  Gift,
+} from 'lucide-react';
+import { clsx } from 'clsx';
 import type { Rep, Customer } from '@/types/database';
+
+type Step = 1 | 2 | 3;
 
 export default function ReferralSubmissionPage() {
   const params = useParams();
-  const router = useRouter();
   const repId = params.repId as string;
 
   const [rep, setRep] = useState<Rep | null>(null);
@@ -17,6 +36,7 @@ export default function ReferralSubmissionPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [step, setStep] = useState<Step>(1);
 
   // Form state
   const [name, setName] = useState('');
@@ -25,6 +45,7 @@ export default function ReferralSubmissionPage() {
   const [notes, setNotes] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [submittedReferrerName, setSubmittedReferrerName] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -35,8 +56,7 @@ export default function ReferralSubmissionPage() {
         ]);
         setRep(repData);
         setCustomers(customersData);
-        
-        // Auto-select first customer if only one
+
         if (customersData.length === 1) {
           setSelectedCustomerId(customersData[0].id);
         }
@@ -50,24 +70,40 @@ export default function ReferralSubmissionPage() {
     loadData();
   }, [repId]);
 
+  const fireConfetti = useCallback(() => {
+    const count = 200;
+    const defaults = {
+      origin: { y: 0.7 },
+      zIndex: 9999,
+    };
+
+    function fire(particleRatio: number, opts: confetti.Options) {
+      confetti({
+        ...defaults,
+        ...opts,
+        particleCount: Math.floor(count * particleRatio),
+      });
+    }
+
+    fire(0.25, { spread: 26, startVelocity: 55, colors: ['#10B981', '#34D399'] });
+    fire(0.2, { spread: 60, colors: ['#F97316', '#FBBF24'] });
+    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8, colors: ['#10B981', '#F97316'] });
+    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2, colors: ['#FBBF24', '#34D399'] });
+    fire(0.1, { spread: 120, startVelocity: 45, colors: ['#F97316', '#10B981'] });
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
     try {
-      // Validation
-      if (!name.trim()) {
-        throw new Error('Name is required');
-      }
-      if (!phone.trim() && !email.trim()) {
-        throw new Error('Please provide a phone number or email');
-      }
+      if (!name.trim()) throw new Error('Name is required');
+      if (!phone.trim() && !email.trim()) throw new Error('Please provide a phone number or email');
+      if (!agreedToTerms) throw new Error('Please agree to be contacted');
 
-      // Use selected customer or first available
       const referrerId = selectedCustomerId || customers[0]?.id;
 
-      // Submit via API for persistence
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,21 +117,24 @@ export default function ReferralSubmissionPage() {
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to submit referral');
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit referral');
-      }
-
-      // Save the referrer name for the success page
-      const referrer = customers.find(c => c.id === referrerId);
+      const referrer = customers.find((c) => c.id === referrerId);
       setSubmittedReferrerName(referrer?.name || rep?.name || 'a friend');
       setSubmitted(true);
+
+      // Fire confetti!
+      setTimeout(fireConfetti, 300);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit referral');
     } finally {
       setSubmitting(false);
     }
   };
+
+  const canProceedStep1 = name.trim().length > 0;
+  const canProceedStep2 = phone.trim().length > 0 || email.trim().length > 0;
+  const canSubmit = agreedToTerms;
 
   if (loading) {
     return (
@@ -120,20 +159,35 @@ export default function ReferralSubmissionPage() {
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
-        <div className="w-full max-w-md text-center">
-          <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-emerald-400" />
-          </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Thank You!</h1>
-          <p className="text-slate-400 mb-6">
-            Your information has been submitted successfully. A representative from Guardian Storm Repair will contact you shortly to schedule your free inspection.
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', duration: 0.6 }}
+          className="w-full max-w-md text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500/30 to-emerald-600/10 flex items-center justify-center mx-auto mb-6 border border-emerald-500/30"
+          >
+            <CheckCircle className="w-12 h-12 text-emerald-400" />
+          </motion.div>
+          <h1 className="text-3xl font-bold text-white mb-3">Thank You!</h1>
+          <p className="text-slate-400 mb-8 text-lg">
+            We&apos;ll be in touch shortly to schedule your free inspection.
           </p>
-          <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
-            <p className="text-sm text-slate-300">
-              Referred by <span className="font-semibold text-white">{submittedReferrerName}</span>
+          <div className="p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50">
+            <p className="text-slate-300">
+              Referred by{' '}
+              <span className="font-semibold text-white">{submittedReferrerName}</span>
+            </p>
+            <p className="text-sm text-emerald-400 mt-2 flex items-center justify-center gap-1">
+              <Gift className="w-4 h-4" />
+              They&apos;ll earn $250 when you become a customer!
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -143,7 +197,7 @@ export default function ReferralSubmissionPage() {
       <div className="w-full max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-guardian-navy mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-guardian-gold/20 to-guardian-gold/5 border border-guardian-gold/30 mb-4">
             <Shield className="w-8 h-8 text-guardian-gold" />
           </div>
           <h1 className="text-2xl font-bold text-white">Guardian Storm Repair</h1>
@@ -152,15 +206,36 @@ export default function ReferralSubmissionPage() {
           </p>
         </div>
 
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="flex items-center">
+              <div
+                className={clsx(
+                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all',
+                  s === step
+                    ? 'bg-guardian-gold text-slate-900'
+                    : s < step
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-slate-800 text-slate-400'
+                )}
+              >
+                {s < step ? <CheckCircle className="w-4 h-4" /> : s}
+              </div>
+              {s < 3 && (
+                <div
+                  className={clsx(
+                    'w-12 h-1 mx-1 rounded-full transition-all',
+                    s < step ? 'bg-emerald-500' : 'bg-slate-800'
+                  )}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
         {/* Form Card */}
         <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-white">Get Your Free Inspection</h2>
-            <p className="text-sm text-slate-400 mt-1">
-              Submit your information and we&apos;ll contact you to schedule a free roof inspection and quote.
-            </p>
-          </div>
-
           {error && (
             <div className="flex items-center gap-3 p-4 mb-6 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -168,140 +243,232 @@ export default function ReferralSubmissionPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
-                Your Name *
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="w-5 h-5 text-slate-500" />
-                </div>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Smith"
-                  required
-                  disabled={submitting}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent disabled:opacity-50 transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-slate-300 mb-2">
-                Phone Number
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="w-5 h-5 text-slate-500" />
-                </div>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="(555) 123-4567"
-                  disabled={submitting}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent disabled:opacity-50 transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="w-5 h-5 text-slate-500" />
-                </div>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  disabled={submitting}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent disabled:opacity-50 transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div>
-              <label htmlFor="notes" className="block text-sm font-medium text-slate-300 mb-2">
-                Additional Information (Optional)
-              </label>
-              <div className="relative">
-                <div className="absolute top-3 left-3 pointer-events-none">
-                  <FileText className="w-5 h-5 text-slate-500" />
-                </div>
-                <textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Tell us about your roof damage or any special concerns..."
-                  rows={3}
-                  disabled={submitting}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent disabled:opacity-50 transition-all resize-none"
-                />
-              </div>
-            </div>
-
-            {/* Customer Selector - only show if multiple customers */}
-            {customers.length > 1 && (
-              <div>
-                <label htmlFor="customer" className="block text-sm font-medium text-slate-300 mb-2">
-                  Who referred you?
-                </label>
-                <select
-                  id="customer"
-                  value={selectedCustomerId}
-                  onChange={(e) => setSelectedCustomerId(e.target.value)}
-                  disabled={submitting}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent disabled:opacity-50 transition-all"
+          <form onSubmit={handleSubmit}>
+            <AnimatePresence mode="wait">
+              {/* Step 1: Your Info */}
+              {step === 1 && (
+                <motion.div
+                  key="step1"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4"
                 >
-                  <option value="">Select...</option>
-                  {customers.map((customer) => (
-                    <option key={customer.id} value={customer.id}>
-                      {customer.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold text-white">Your Information</h2>
+                    <p className="text-sm text-slate-400 mt-1">Tell us about yourself</p>
+                  </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-3 px-4 rounded-lg bg-guardian-gold text-guardian-navy font-semibold hover:bg-guardian-gold/90 focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-6"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                'Request Free Inspection'
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-slate-300">
+                      Your Name *
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <Input
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="John Smith"
+                        className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    disabled={!canProceedStep1}
+                    className="w-full mt-6 bg-guardian-gold hover:bg-guardian-gold/90 text-slate-900 font-semibold"
+                  >
+                    Continue
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </motion.div>
               )}
-            </button>
-          </form>
 
-          <p className="text-xs text-slate-500 text-center mt-4">
-            By submitting, you agree to be contacted about storm repair services.
-          </p>
+              {/* Step 2: Contact Info */}
+              {step === 2 && (
+                <motion.div
+                  key="step2"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4"
+                >
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold text-white">Contact Details</h2>
+                    <p className="text-sm text-slate-400 mt-1">How can we reach you?</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-slate-300">
+                      Phone Number
+                    </Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="(555) 123-4567"
+                        className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-slate-300">
+                      Email Address
+                    </Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-500 text-center">
+                    Please provide at least one contact method
+                  </p>
+
+                  <div className="flex gap-3 mt-6">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setStep(1)}
+                      className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-800"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setStep(3)}
+                      disabled={!canProceedStep2}
+                      className="flex-1 bg-guardian-gold hover:bg-guardian-gold/90 text-slate-900 font-semibold"
+                    >
+                      Continue
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Step 3: Review & Submit */}
+              {step === 3 && (
+                <motion.div
+                  key="step3"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4"
+                >
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold text-white">Almost Done!</h2>
+                    <p className="text-sm text-slate-400 mt-1">Review and submit your referral</p>
+                  </div>
+
+                  {/* Summary Card */}
+                  <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Name</span>
+                      <span className="text-white font-medium">{name}</span>
+                    </div>
+                    {phone && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Phone</span>
+                        <span className="text-white">{phone}</span>
+                      </div>
+                    )}
+                    {email && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Email</span>
+                        <span className="text-white">{email}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Optional Notes */}
+                  <div className="space-y-2">
+                    <Label htmlFor="notes" className="text-slate-300">
+                      Additional Notes (Optional)
+                    </Label>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-3 w-5 h-5 text-slate-500" />
+                      <textarea
+                        id="notes"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Tell us about your roof damage or concerns..."
+                        rows={3}
+                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-guardian-gold focus:border-transparent resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Agreement Checkbox */}
+                  <label className="flex items-start gap-3 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 cursor-pointer hover:bg-slate-800/50 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-slate-600 bg-slate-800 text-guardian-gold focus:ring-guardian-gold focus:ring-offset-slate-900"
+                    />
+                    <span className="text-sm text-slate-300">
+                      I agree to be contacted by Guardian Storm Repair about their services and scheduling a free inspection.
+                    </span>
+                  </label>
+
+                  <div className="flex gap-3 mt-6">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setStep(2)}
+                      className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-800"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={!canSubmit || submitting}
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold disabled:opacity-50"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          Submit Referral
+                          <CheckCircle className="w-4 h-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </form>
         </div>
 
         {/* Footer */}
         <p className="text-center text-sm text-slate-500 mt-8">
-          Guardian Storm Repair &copy; {new Date().getFullYear()}
+          Guardian Storm Repair © {new Date().getFullYear()}
         </p>
       </div>
     </div>
