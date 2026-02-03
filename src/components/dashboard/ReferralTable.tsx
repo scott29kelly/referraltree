@@ -2,6 +2,7 @@
 
 import { useState, useMemo, Fragment } from 'react';
 import { clsx } from 'clsx';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown,
   ChevronUp,
@@ -83,6 +84,59 @@ function formatDate(dateString: string): string {
   });
 }
 
+// Animation variants
+const tableContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.03,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const rowVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      ease: [0.25, 0.4, 0.25, 1] as const,
+    },
+  },
+};
+
+const expandVariants = {
+  hidden: { 
+    opacity: 0, 
+    height: 0,
+  },
+  visible: { 
+    opacity: 1, 
+    height: 'auto' as const,
+    transition: {
+      height: { duration: 0.3, ease: [0.25, 0.4, 0.25, 1] as const },
+      opacity: { duration: 0.2, delay: 0.1 },
+    },
+  },
+  exit: { 
+    opacity: 0, 
+    height: 0,
+    transition: {
+      height: { duration: 0.2, ease: [0.25, 0.4, 0.25, 1] as const },
+      opacity: { duration: 0.1 },
+    },
+  },
+};
+
+const filterButtonVariants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.02 },
+  tap: { scale: 0.98 },
+};
+
 export default function ReferralTable({
   referrals,
   onStatusChange,
@@ -140,16 +194,23 @@ export default function ReferralTable({
 
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) return null;
-    return sortDirection === 'asc' ? (
-      <ChevronUp className="w-4 h-4" />
-    ) : (
-      <ChevronDown className="w-4 h-4" />
+    return (
+      <motion.div
+        initial={{ rotate: 0 }}
+        animate={{ rotate: sortDirection === 'asc' ? 180 : 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <ChevronDown className="w-4 h-4" />
+      </motion.div>
     );
   };
 
   if (referrals.length === 0) {
     return (
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
         className={clsx(
           'rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-800/30',
           'backdrop-blur-sm border border-slate-700/40',
@@ -158,12 +219,15 @@ export default function ReferralTable({
         )}
       >
         <NoReferralsEmpty className="py-8" />
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
       className={clsx(
         'rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-800/30',
         'backdrop-blur-sm border border-slate-700/40 overflow-hidden',
@@ -173,8 +237,12 @@ export default function ReferralTable({
     >
       {/* Filters */}
       <div className="p-4 border-b border-slate-700/40 flex flex-wrap gap-2">
-        <button
+        <motion.button
           onClick={() => setStatusFilter('all')}
+          variants={filterButtonVariants}
+          initial="rest"
+          whileHover="hover"
+          whileTap="tap"
           className={clsx(
             'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
             statusFilter === 'all'
@@ -183,13 +251,17 @@ export default function ReferralTable({
           )}
         >
           All ({referrals.length})
-        </button>
+        </motion.button>
         {(Object.keys(statusConfig) as ReferralStatus[]).map((status) => {
           const count = referrals.filter((r) => r.status === status).length;
           return (
-            <button
+            <motion.button
               key={status}
               onClick={() => setStatusFilter(status)}
+              variants={filterButtonVariants}
+              initial="rest"
+              whileHover="hover"
+              whileTap="tap"
               className={clsx(
                 'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
                 statusFilter === status
@@ -198,7 +270,7 @@ export default function ReferralTable({
               )}
             >
               {statusConfig[status].label} ({count})
-            </button>
+            </motion.button>
           );
         })}
       </div>
@@ -251,24 +323,36 @@ export default function ReferralTable({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/30">
-            {filteredAndSorted.map((referral) => {
+          <motion.tbody 
+            className="divide-y divide-slate-700/30"
+            variants={tableContainerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {filteredAndSorted.map((referral, index) => {
               const isExpanded = expandedId === referral.id;
               const config = statusConfig[referral.status];
 
               return (
                 <Fragment key={referral.id}>
-                  <tr
-                    className="group hover:bg-slate-700/20 cursor-pointer transition-all duration-200"
+                  <motion.tr
+                    variants={rowVariants}
+                    className="group hover:bg-slate-700/20 cursor-pointer transition-colors duration-200"
                     onClick={() =>
                       setExpandedId(isExpanded ? null : referral.id)
                     }
+                    whileHover={{ backgroundColor: 'rgba(51, 65, 85, 0.2)' }}
+                    layout
                   >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center border border-slate-600/30 transition-transform duration-200 group-hover:scale-105">
+                        <motion.div 
+                          className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center border border-slate-600/30"
+                          whileHover={{ scale: 1.1 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                        >
                           <User className="w-5 h-5 text-slate-400" />
-                        </div>
+                        </motion.div>
                         <div>
                           <span className="text-white font-semibold">
                             {referral.referee_name}
@@ -288,7 +372,7 @@ export default function ReferralTable({
                     )}
                     <td className="px-5 py-4">
                       {onStatusChange ? (
-                        <select
+                        <motion.select
                           value={referral.status}
                           onChange={(e) => {
                             e.stopPropagation();
@@ -298,6 +382,7 @@ export default function ReferralTable({
                             );
                           }}
                           onClick={(e) => e.stopPropagation()}
+                          whileHover={{ scale: 1.02 }}
                           className={clsx(
                             'px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer',
                             'shadow-lg transition-all duration-200',
@@ -315,11 +400,14 @@ export default function ReferralTable({
                               </option>
                             )
                           )}
-                        </select>
+                        </motion.select>
                       ) : (
-                        <span
+                        <motion.span
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: index * 0.02 }}
                           className={clsx(
-                            'px-3 py-1.5 rounded-lg text-xs font-semibold border shadow-lg',
+                            'px-3 py-1.5 rounded-lg text-xs font-semibold border shadow-lg inline-block',
                             config.bg,
                             config.color,
                             config.border,
@@ -327,73 +415,126 @@ export default function ReferralTable({
                           )}
                         >
                           {config.label}
-                        </span>
+                        </motion.span>
                       )}
                     </td>
                     <td className="px-5 py-4 text-guardian-gold font-bold">
                       ${referral.value}
                     </td>
                     <td className="px-5 py-4 text-slate-400 text-sm">
-                      {formatDate(referral.created_at)}
+                      <div className="flex items-center gap-2">
+                        {formatDate(referral.created_at)}
+                        <motion.div
+                          animate={{ rotate: isExpanded ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ChevronDown className="w-4 h-4 text-slate-500" />
+                        </motion.div>
+                      </div>
                     </td>
-                  </tr>
-                  {isExpanded && (
-                    <tr className="bg-slate-800/40">
-                      <td colSpan={showCustomer ? 5 : 4} className="px-5 py-5">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {referral.referee_phone && (
-                            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-700/30 border border-slate-600/20">
-                              <div className="w-8 h-8 rounded-lg bg-slate-600/30 flex items-center justify-center">
-                                <Phone className="w-4 h-4 text-slate-400" />
-                              </div>
-                              <span className="text-slate-300 text-sm">
-                                {referral.referee_phone}
-                              </span>
+                  </motion.tr>
+                  
+                  <AnimatePresence mode="wait">
+                    {isExpanded && (
+                      <motion.tr
+                        key={`expanded-${referral.id}`}
+                        variants={expandVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="bg-slate-800/40"
+                      >
+                        <td colSpan={showCustomer ? 5 : 4} className="overflow-hidden">
+                          <motion.div 
+                            className="px-5 py-5"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {referral.referee_phone && (
+                                <motion.div 
+                                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-700/30 border border-slate-600/20"
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.15 }}
+                                  whileHover={{ scale: 1.02, borderColor: 'rgba(100, 116, 139, 0.4)' }}
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-slate-600/30 flex items-center justify-center">
+                                    <Phone className="w-4 h-4 text-slate-400" />
+                                  </div>
+                                  <span className="text-slate-300 text-sm">
+                                    {referral.referee_phone}
+                                  </span>
+                                </motion.div>
+                              )}
+                              {referral.referee_email && (
+                                <motion.div 
+                                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-700/30 border border-slate-600/20"
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.2 }}
+                                  whileHover={{ scale: 1.02, borderColor: 'rgba(100, 116, 139, 0.4)' }}
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-slate-600/30 flex items-center justify-center">
+                                    <Mail className="w-4 h-4 text-slate-400" />
+                                  </div>
+                                  <span className="text-slate-300 text-sm truncate">
+                                    {referral.referee_email}
+                                  </span>
+                                </motion.div>
+                              )}
+                              <motion.div 
+                                className="flex items-center gap-3 p-3 rounded-xl bg-slate-700/30 border border-slate-600/20"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.25 }}
+                                whileHover={{ scale: 1.02, borderColor: 'rgba(100, 116, 139, 0.4)' }}
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-slate-600/30 flex items-center justify-center">
+                                  <Calendar className="w-4 h-4 text-slate-400" />
+                                </div>
+                                <span className="text-slate-300 text-sm">
+                                  Updated: {formatDate(referral.updated_at)}
+                                </span>
+                              </motion.div>
+                              {referral.notes && (
+                                <motion.div 
+                                  className="md:col-span-3 flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-guardian-gold/10 to-guardian-gold/5 border border-guardian-gold/20"
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.3 }}
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-guardian-gold/20 flex items-center justify-center flex-shrink-0">
+                                    <StickyNote className="w-4 h-4 text-guardian-gold" />
+                                  </div>
+                                  <span className="text-slate-300 text-sm leading-relaxed">
+                                    {referral.notes}
+                                  </span>
+                                </motion.div>
+                              )}
                             </div>
-                          )}
-                          {referral.referee_email && (
-                            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-700/30 border border-slate-600/20">
-                              <div className="w-8 h-8 rounded-lg bg-slate-600/30 flex items-center justify-center">
-                                <Mail className="w-4 h-4 text-slate-400" />
-                              </div>
-                              <span className="text-slate-300 text-sm truncate">
-                                {referral.referee_email}
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-700/30 border border-slate-600/20">
-                            <div className="w-8 h-8 rounded-lg bg-slate-600/30 flex items-center justify-center">
-                              <Calendar className="w-4 h-4 text-slate-400" />
-                            </div>
-                            <span className="text-slate-300 text-sm">
-                              Updated: {formatDate(referral.updated_at)}
-                            </span>
-                          </div>
-                          {referral.notes && (
-                            <div className="md:col-span-3 flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-guardian-gold/10 to-guardian-gold/5 border border-guardian-gold/20">
-                              <div className="w-8 h-8 rounded-lg bg-guardian-gold/20 flex items-center justify-center flex-shrink-0">
-                                <StickyNote className="w-4 h-4 text-guardian-gold" />
-                              </div>
-                              <span className="text-slate-300 text-sm leading-relaxed">
-                                {referral.notes}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
+                          </motion.div>
+                        </td>
+                      </motion.tr>
+                    )}
+                  </AnimatePresence>
                 </Fragment>
               );
             })}
-          </tbody>
+          </motion.tbody>
         </table>
       </div>
 
       {/* Results count */}
-      <div className="px-5 py-3 border-t border-slate-700/40 bg-slate-800/30 text-sm text-slate-500">
+      <motion.div 
+        className="px-5 py-3 border-t border-slate-700/40 bg-slate-800/30 text-sm text-slate-500"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
         Showing {filteredAndSorted.length} of {referrals.length} referrals
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

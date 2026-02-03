@@ -1,8 +1,50 @@
+'use client';
+
 import * as React from "react"
+import { motion, type HTMLMotionProps } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+interface CardProps extends React.ComponentProps<"div"> {
+  animate?: boolean
+  hover?: boolean
+  delay?: number
+}
+
+function Card({ 
+  className, 
+  animate = false, 
+  hover = false,
+  delay = 0,
+  ...props 
+}: CardProps) {
+  if (animate || hover) {
+    return (
+      <motion.div
+        data-slot="card"
+        className={cn(
+          "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+          "transition-shadow duration-300",
+          hover && "cursor-pointer",
+          className
+        )}
+        initial={animate ? { opacity: 0, y: 15, scale: 0.98 } : undefined}
+        animate={animate ? { opacity: 1, y: 0, scale: 1 } : undefined}
+        transition={{ 
+          duration: 0.4, 
+          delay,
+          ease: [0.25, 0.4, 0.25, 1],
+        }}
+        whileHover={hover ? { 
+          y: -4, 
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+          transition: { duration: 0.2 },
+        } : undefined}
+        {...(props as HTMLMotionProps<"div">)}
+      />
+    )
+  }
+
   return (
     <div
       data-slot="card"
@@ -81,6 +123,10 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Motion-enabled variants for explicit use
+const MotionCard = motion.div
+const MotionCardContent = motion.div
+
 export {
   Card,
   CardHeader,
@@ -89,4 +135,6 @@ export {
   CardAction,
   CardDescription,
   CardContent,
+  MotionCard,
+  MotionCardContent,
 }
