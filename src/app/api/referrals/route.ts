@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       referee_email: referee_email || null,
       notes: notes || null,
       status: 'submitted',
-      value: 250,
+      value: 125,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };

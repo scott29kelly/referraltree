@@ -26,7 +26,7 @@ import Link from 'next/link';
 import { clsx } from 'clsx';
 import type { Customer, Referral, ReferralStatus } from '@/types/database';
 
-const REFERRAL_BONUS = 250;
+const REFERRAL_BONUS = 125;
 
 const statusConfig: Record<ReferralStatus, { bg: string; border: string; text: string; glow: string; label: string }> = {
   submitted: { bg: 'bg-slate-800/60', border: 'border-slate-500/40', text: 'text-slate-300', glow: '', label: 'Submitted' },
@@ -252,7 +252,7 @@ export default function TreePage() {
             { icon: Users, value: stats.totalCustomers, label: 'Customers', color: 'guardian-gold' },
             { icon: Network, value: stats.totalReferrals, label: 'Referrals', color: 'sky' },
             { icon: CheckCircle, value: stats.soldCount, label: 'Closed', color: 'emerald' },
-            { icon: TrendingUp, value: `$${(stats.totalReferrals - stats.soldCount) * 250}`, label: 'Pending', color: 'amber' },
+            { icon: TrendingUp, value: `$${(stats.totalReferrals - stats.soldCount) * 125}`, label: 'Pending', color: 'amber' },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}

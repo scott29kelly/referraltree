@@ -41,7 +41,7 @@ const nodeTypes = {
   referral: ReferralNode,
 };
 
-const REFERRAL_BONUS = 250;
+const REFERRAL_BONUS = 125;
 
 // Calculate tree layout for this rep's network
 function calculateTreeLayout(

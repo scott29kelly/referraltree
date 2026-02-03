@@ -184,7 +184,7 @@ export default function ReferralSubmissionPage() {
             </p>
             <p className="text-sm text-emerald-400 mt-2 flex items-center justify-center gap-1">
               <Gift className="w-4 h-4" />
-              They&apos;ll earn $250 when you become a customer!
+              You&apos;ll earn $125 when your referral becomes a customer!
             </p>
           </div>
         </motion.div>

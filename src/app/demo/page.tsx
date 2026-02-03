@@ -111,7 +111,7 @@ export default function DemoPage() {
           <FeatureCard
             icon={DollarSign}
             title="Earnings Tracker"
-            description="Real-time running total of $250 per closed referral with animated counter"
+            description="Real-time running total of $125 per closed referral with animated counter"
             color="emerald"
             delay={0.7}
           />
@@ -141,7 +141,7 @@ export default function DemoPage() {
             { step: 1, title: 'Sales rep shares QR', desc: 'After a successful job' },
             { step: 2, title: 'Customer submits referral', desc: 'Name, phone, email' },
             { step: 3, title: 'Tree grows automatically', desc: 'Visual status tracking' },
-            { step: 4, title: 'Earn $250 per close', desc: 'Automatic notification' },
+            { step: 4, title: 'Earn $125 per close', desc: 'Automatic notification' },
           ].map((item, i) => (
             <motion.div
               key={item.step}

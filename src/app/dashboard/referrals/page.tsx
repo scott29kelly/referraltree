@@ -142,7 +142,7 @@ export default function ReferralsPage() {
         <div className="p-4 rounded-xl bg-guardian-gold/10 border border-guardian-gold/20">
           <p className="text-sm text-slate-400">Total Earnings</p>
           <p className="text-2xl font-bold text-guardian-gold">
-            ${(referrals.filter((r) => r.status === 'sold').length * 250).toLocaleString()}
+            ${(referrals.filter((r) => r.status === 'sold').length * 125).toLocaleString()}
           </p>
         </div>
       </div>

@@ -233,7 +233,7 @@ export default function QRCodePage() {
                 <span className="w-6 h-6 rounded-full bg-guardian-gold/20 text-guardian-gold flex items-center justify-center flex-shrink-0 text-xs font-semibold">
                   4
                 </span>
-                <span>Earn $250 for every referral that closes!</span>
+                <span>Earn $125 for every referral that closes!</span>
               </li>
             </ol>
           </div>

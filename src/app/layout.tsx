@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Guardianship | Referral Program',
-  description: 'Track your referrals and earn $250 for every closed deal with Guardian Storm Repair.',
+  description: 'Track your referrals and earn $125 for every closed deal with Guardian Storm Repair.',
   keywords: ['referral', 'storm repair', 'roofing', 'guardian', 'earnings'],
   authors: [{ name: 'Guardian Storm Repair' }],
   manifest: '/manifest.json',
   openGraph: {
     title: 'Guardianship | Referral Program',
-    description: 'Track your referrals and earn $250 for every closed deal.',
+    description: 'Track your referrals and earn $125 for every closed deal.',
     type: 'website',
   },
   icons: {

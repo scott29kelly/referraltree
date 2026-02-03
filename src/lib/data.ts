@@ -310,7 +310,7 @@ export async function createReferral(input: CreateReferralInput): Promise<Referr
       .insert({
         ...input,
         status: 'submitted',
-        value: 250,
+        value: 125,
       })
       .select()
       .single();
@@ -325,7 +325,7 @@ export async function createReferral(input: CreateReferralInput): Promise<Referr
     referee_phone: input.referee_phone || null,
     referee_email: input.referee_email || null,
     status: 'submitted',
-    value: 250,
+    value: 125,
     notes: input.notes || null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -400,8 +400,8 @@ export async function getDashboardStats(repId: string): Promise<DashboardStats> 
     contacted,
     quoted,
     sold,
-    total_earnings: sold * 250,
-    pending_earnings: (submitted + contacted + quoted) * 250,
+    total_earnings: sold * 125,
+    pending_earnings: (submitted + contacted + quoted) * 125,
   };
 }
 
@@ -415,7 +415,7 @@ export async function getAdminStats(): Promise<AdminStats> {
   const quoted = referrals.filter((r) => r.status === 'quoted').length;
   const sold = referrals.filter((r) => r.status === 'sold').length;
 
-  const totalEarnings = sold * 250;
+  const totalEarnings = sold * 125;
   const conversionRate = referrals.length > 0 ? (sold / referrals.length) * 100 : 0;
 
   return {
@@ -425,7 +425,7 @@ export async function getAdminStats(): Promise<AdminStats> {
     quoted,
     sold,
     total_earnings: totalEarnings,
-    pending_earnings: (submitted + contacted + quoted) * 250,
+    pending_earnings: (submitted + contacted + quoted) * 125,
     total_reps: reps.length,
     active_reps: activeReps.length,
     conversion_rate: Math.round(conversionRate * 10) / 10,

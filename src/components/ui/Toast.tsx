@@ -21,7 +21,7 @@ export interface ToastItem {
  * toast.success('Success!', 'Your action was completed');
  * toast.error('Error', 'Something went wrong');
  * toast.info('Info', 'Here is some information');
- * toast.celebration('Amazing!', 'You earned $250!');
+ * toast.celebration('Amazing!', 'You earned $125!');
  */
 export const toast = {
   success: (title: string, message?: string) => {

@@ -89,7 +89,7 @@ export default function ReportsPage() {
     const quoted = filteredReferrals.filter((r) => r.status === 'quoted').length;
     const sold = filteredReferrals.filter((r) => r.status === 'sold').length;
     const total = filteredReferrals.length;
-    const revenue = sold * 250;
+    const revenue = sold * 125;
     const conversionRate = total > 0 ? ((sold / total) * 100).toFixed(1) : '0';
 
     return {

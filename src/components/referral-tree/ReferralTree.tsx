@@ -41,7 +41,7 @@ const DEMO_REFERRALS: ReferralNodeData[] = [
     phone: '(215) 555-0456',
     status: 'sold',
     submittedAt: new Date('2024-02-01'),
-    earnings: 250,
+    earnings: 125,
   },
   {
     id: 'ref-2',
@@ -70,11 +70,11 @@ const DEMO_REFERRALS: ReferralNodeData[] = [
     phone: '(215) 555-0890',
     status: 'sold',
     submittedAt: new Date('2024-03-05'),
-    earnings: 250,
+    earnings: 125,
   },
 ];
 
-const REFERRAL_BONUS = 250;
+const REFERRAL_BONUS = 125;
 
 // Calculate tree layout
 function calculateTreeLayout(referrals: ReferralNodeData[]): {
@@ -188,7 +188,7 @@ function ReferralTreeInner({ referrals: initialReferrals = DEMO_REFERRALS }: Ref
     // Show celebration toast
     toast.celebration(
       'Referral Submitted!',
-      `${newReferral.name} has been added to your tree. Earn $250 when they close!`
+      `${newReferral.name} has been added to your tree. Earn $125 when they close!`
     );
   }, []);
 

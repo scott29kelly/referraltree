@@ -124,7 +124,7 @@ export default function AddReferralForm({ isOpen, onClose, onSubmit }: AddReferr
         {/* Header */}
         <MobileSheetHeader onClose={handleClose}>
           <MobileSheetTitle>Add Referral</MobileSheetTitle>
-          <MobileSheetDescription>Earn $250 when they close!</MobileSheetDescription>
+          <MobileSheetDescription>Earn $125 when they close!</MobileSheetDescription>
         </MobileSheetHeader>
 
         {/* Body */}

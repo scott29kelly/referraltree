@@ -262,7 +262,7 @@ export function NoReferralsEmpty({
     <EmptyState
       variant="no-referrals"
       title="No referrals yet"
-      description="Share your QR code or referral link to start earning $250 for every closed deal."
+      description="Share your QR code or referral link to start earning $125 for every closed deal."
       action={onAction ? {
         label: 'Share QR Code',
         onClick: onAction,

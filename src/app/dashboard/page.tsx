@@ -50,7 +50,7 @@ export default function DashboardPage() {
           ...statsData,
           total_referrals: statsData.total_referrals + apiReferrals.length,
           submitted: statsData.submitted + apiSubmitted,
-          pending_earnings: statsData.pending_earnings + (apiSubmitted * 250),
+          pending_earnings: statsData.pending_earnings + (apiSubmitted * 125),
         };
 
         // Combine referrals for recent list
@@ -110,7 +110,7 @@ export default function DashboardPage() {
         totalEarnings={totalEarnings}
         pendingEarnings={pendingEarnings}
         paidOut={paidOut}
-        nextMilestone={250}
+        nextMilestone={125}
       />
 
       {/* Quick Stats */}

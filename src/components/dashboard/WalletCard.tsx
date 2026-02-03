@@ -17,13 +17,13 @@ export function WalletCard({
   totalEarnings,
   pendingEarnings,
   paidOut,
-  nextMilestone = 250,
+  nextMilestone = 125,
   className,
 }: WalletCardProps) {
   // Calculate progress to next milestone
   const progressToNext = pendingEarnings % nextMilestone;
   const progressPercent = (progressToNext / nextMilestone) * 100;
-  const dealsToNextPayout = Math.ceil((nextMilestone - progressToNext) / 250);
+  const dealsToNextPayout = Math.ceil((nextMilestone - progressToNext) / 125);
 
   return (
     <Card className={clsx(
