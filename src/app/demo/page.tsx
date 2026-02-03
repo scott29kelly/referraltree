@@ -200,7 +200,7 @@ export default function DemoPage() {
               This QR code would link directly to the customer's referral submission form
             </p>
             <Link
-              href="/referrals/demo-customer"
+              href="/refer/b2c3d4e5-f6a7-8901-bcde-f12345678901"
               className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400
                          text-white font-medium rounded-lg transition-colors"
             >
