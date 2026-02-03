@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { signIn, setAuthCookie } from '@/lib/auth';
-import { Shield, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { Shield, Mail, Lock, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -56,6 +57,15 @@ export default function LoginForm() {
           <h1 className="text-2xl font-bold text-white">Guardianship</h1>
           <p className="text-slate-400 mt-2">Sign in to your account</p>
         </div>
+
+        {/* Back to Customer View */}
+        <Link
+          href="/demo"
+          className="flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Customer View
+        </Link>
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
