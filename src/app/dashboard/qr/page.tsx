@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { QrCode, Copy, Download, Check, ExternalLink } from 'lucide-react';
+import { getReferralUrl } from '@/lib/utils';
 
 // Simple QR Code generator using Canvas API
 function generateQRCode(text: string, size: number = 200): string {
@@ -19,9 +20,8 @@ export default function QRCodePage() {
 
   useEffect(() => {
     if (rep) {
-      // Generate referral link based on rep ID
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      setReferralLink(`${baseUrl}/refer/${rep.id}`);
+      // Generate referral link using centralized utility for production-safe URLs
+      setReferralLink(getReferralUrl(rep.id));
     }
   }, [rep]);
 

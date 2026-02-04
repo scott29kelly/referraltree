@@ -33,3 +33,40 @@ export function isValidPhone(phone: string): boolean {
 export function generateId(): string {
   return `ref-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
+
+/**
+ * Get the base URL for the application.
+ * Prioritizes NEXT_PUBLIC_APP_URL environment variable for production deployments,
+ * falls back to window.location.origin for development.
+ */
+export function getAppUrl(): string {
+  // First check environment variable (works on server and client)
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+
+  // Fallback to window.location.origin (client-side only)
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+
+  // Default fallback for SSR when no env var is set
+  return '';
+}
+
+/**
+ * Generate a referral link for a specific rep.
+ * Uses the production URL when available.
+ */
+export function getReferralUrl(repId: string): string {
+  const baseUrl = getAppUrl();
+  return `${baseUrl}/refer/${repId}`;
+}
+
+/**
+ * Generate a customer tree view URL.
+ */
+export function getCustomerTreeUrl(customerId: string): string {
+  const baseUrl = getAppUrl();
+  return `${baseUrl}/referrals/${customerId}`;
+}

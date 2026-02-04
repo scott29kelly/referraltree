@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { getAdminStats, getRepsWithStats, getActivities, getReferrals, getCustomers } from '@/lib/data';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ActivityFeed from '@/components/dashboard/ActivityFeed';
+import { Leaderboard, type RepLeaderboardData } from '@/components/dashboard/Leaderboard';
 import { PipelineKanban } from '@/components/admin/PipelineKanban';
 import { AdminPageSkeleton } from '@/components/ui/skeletons';
 import { Users, TrendingUp, DollarSign, CheckCircle, ArrowRight, Trophy, Kanban } from 'lucide-react';
@@ -191,63 +192,23 @@ export default function AdminHomePage() {
         </Link>
       </div>
 
-      {/* Top Performers & Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Performers */}
-        <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Top Performers</h3>
-            <Link
-              href="/admin/reps"
-              className="text-sm text-emerald-400 hover:underline"
-            >
-              View all
-            </Link>
-          </div>
-          {topReps.length === 0 ? (
-            <p className="text-slate-400 text-center py-8">No reps yet</p>
-          ) : (
-            <div className="space-y-3">
-              {topReps.map((rep, index) => (
-                <div
-                  key={rep.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        index === 0
-                          ? 'bg-guardian-gold/20 text-guardian-gold'
-                          : 'bg-slate-700 text-slate-400'
-                      }`}
-                    >
-                      {index === 0 ? (
-                        <Trophy className="w-4 h-4" />
-                      ) : (
-                        <span className="text-sm font-medium">{index + 1}</span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium text-white">{rep.name}</p>
-                      <p className="text-xs text-slate-500">
-                        {rep.total_sold} sold of {rep.total_referrals} referrals
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-emerald-400">
-                      ${rep.total_earnings.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      {/* Leaderboard - Full Width */}
+      <Leaderboard
+        data={topReps.map((rep): RepLeaderboardData => ({
+          id: rep.id,
+          name: rep.name,
+          totalReferrals: rep.total_referrals,
+          contactedReferrals: rep.total_referrals - (rep.total_sold || 0), // Estimate
+          closedDeals: rep.total_sold,
+          revenue: rep.total_earnings,
+          level2Unlocked: rep.total_referrals >= 10 && rep.total_sold >= 5,
+          trend: Math.random() > 0.5 ? 'up' : Math.random() > 0.5 ? 'down' : 'neutral', // Mock trend
+        }))}
+        showAll
+      />
 
-        {/* Activity Feed */}
-        <ActivityFeed activities={activities} />
-      </div>
+      {/* Activity Feed */}
+      <ActivityFeed activities={activities} />
     </div>
   );
 }

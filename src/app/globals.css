@@ -5,16 +5,19 @@
 
 /* Guardian Brand Theme - Premium 2026 Edition */
 @theme inline {
-  /* Brand Colors */
-  --color-guardian-navy: #1E3A5F;
-  --color-guardian-gold: #D4A656;
-  --color-guardian-green: #2D5A3D;
+  /* Brand Colors - Guardian Storm Repair Official Palette */
+  --color-guardian-navy: #1E3A5F;       /* Primary navy blue (headers, buttons) */
+  --color-guardian-blue: #2B5797;       /* Secondary blue (accents) */
+  --color-guardian-lightBlue: #4A90D9;  /* Light blue accent */
+  --color-guardian-gold: #D4A656;       /* Gold accent (highlights, badges) */
+  --color-guardian-orange: #E67E22;     /* Orange (CTAs, urgent actions) */
+  --color-guardian-green: #2D5A3D;      /* Success/sold status */
 
   /* Status Colors */
-  --color-status-submitted: #64748b;
-  --color-status-contacted: #0ea5e9;
-  --color-status-quoted: #f59e0b;
-  --color-status-sold: #10b981;
+  --color-status-submitted: #64748b;    /* Slate gray */
+  --color-status-contacted: #0ea5e9;    /* Sky blue */
+  --color-status-quoted: #f59e0b;       /* Amber */
+  --color-status-sold: #10b981;         /* Emerald */
 
   /* Background */
   --color-background: #050508;
@@ -174,6 +177,14 @@ body {
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.6) 100%);
 }
 
+.gradient-orange {
+  background: linear-gradient(135deg, rgba(230, 126, 34, 0.15) 0%, rgba(230, 126, 34, 0.05) 100%);
+}
+
+.gradient-navy {
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.15) 0%, rgba(30, 58, 95, 0.05) 100%);
+}
+
 /* Shimmer Effect */
 .shimmer {
   position: relative;
@@ -204,6 +215,14 @@ body {
   box-shadow: 0 0 20px rgba(14, 165, 233, 0.25), 0 0 40px rgba(14, 165, 233, 0.1);
 }
 
+.glow-orange {
+  box-shadow: 0 0 20px rgba(230, 126, 34, 0.25), 0 0 40px rgba(230, 126, 34, 0.1);
+}
+
+.glow-navy {
+  box-shadow: 0 0 20px rgba(30, 58, 95, 0.25), 0 0 40px rgba(30, 58, 95, 0.1);
+}
+
 /* Premium Button Styles */
 .btn-primary {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -224,6 +243,28 @@ body {
 
 .btn-gold:hover {
   box-shadow: 0 6px 20px 0 rgba(212, 166, 86, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-orange {
+  background: linear-gradient(135deg, #E67E22 0%, #D35400 100%);
+  box-shadow: 0 4px 14px 0 rgba(230, 126, 34, 0.3);
+  transition: all 0.3s ease-out;
+}
+
+.btn-orange:hover {
+  box-shadow: 0 6px 20px 0 rgba(230, 126, 34, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-navy {
+  background: linear-gradient(135deg, #2B5797 0%, #1E3A5F 100%);
+  box-shadow: 0 4px 14px 0 rgba(30, 58, 95, 0.3);
+  transition: all 0.3s ease-out;
+}
+
+.btn-navy:hover {
+  box-shadow: 0 6px 20px 0 rgba(30, 58, 95, 0.4);
   transform: translateY(-2px);
 }
 

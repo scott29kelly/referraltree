@@ -2,21 +2,22 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, ArrowRight, Smartphone, Users, DollarSign, Sparkles } from 'lucide-react';
+import { ArrowRight, Smartphone, Users, DollarSign, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import CustomerHeader from '@/components/ui/CustomerHeader';
+import { GuardianLogo } from '@/components/ui/guardian-logo';
 
 export default function DemoPage() {
   const [showQRSimulation, setShowQRSimulation] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-guardian-navy/30 to-slate-950">
       <CustomerHeader />
 
       {/* Hero Section */}
       <div className="relative overflow-hidden pt-16">
         {/* Background gradient orbs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-guardian-gold/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
 
         <div className="relative max-w-4xl mx-auto px-6 py-16 text-center">
@@ -25,15 +26,9 @@ export default function DemoPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', duration: 0.8 }}
-            className="inline-flex items-center gap-3 mb-8"
+            className="inline-block mb-8"
           >
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-xl shadow-amber-500/30">
-              <Shield className="w-8 h-8 text-white" />
-            </div>
-            <div className="text-left">
-              <h1 className="text-2xl font-bold text-white">Guardianship</h1>
-              <p className="text-sm text-slate-400">Referral Program</p>
-            </div>
+            <GuardianLogo size="lg" variant="gold" showText />
           </motion.div>
 
           {/* Headline */}
@@ -44,7 +39,7 @@ export default function DemoPage() {
             className="text-4xl md:text-5xl font-bold text-white mb-4"
           >
             Turn Happy Customers Into
-            <span className="block mt-2 bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">
+            <span className="block mt-2 bg-gradient-to-r from-guardian-gold to-guardian-orange bg-clip-text text-transparent">
               Your Sales Team
             </span>
           </motion.h2>
@@ -70,9 +65,9 @@ export default function DemoPage() {
             <Link
               href="/referrals/demo-customer"
               className="group inline-flex items-center gap-2 px-6 py-4
-                         bg-gradient-to-r from-amber-500 to-amber-600
-                         hover:from-amber-400 hover:to-amber-500
-                         text-white font-semibold rounded-xl shadow-lg shadow-amber-500/30
+                         bg-gradient-to-r from-guardian-gold to-guardian-orange
+                         hover:from-guardian-gold/90 hover:to-guardian-orange/90
+                         text-guardian-navy font-semibold rounded-xl shadow-lg shadow-guardian-gold/30
                          transition-all duration-300"
             >
               <Smartphone className="w-5 h-5" />
@@ -82,8 +77,8 @@ export default function DemoPage() {
             <button
               onClick={() => setShowQRSimulation(true)}
               className="inline-flex items-center gap-2 px-6 py-4
-                         bg-slate-800 hover:bg-slate-700
-                         text-white font-semibold rounded-xl border border-slate-700
+                         bg-guardian-navy hover:bg-guardian-blue
+                         text-white font-semibold rounded-xl border border-guardian-blue/30
                          transition-all duration-300"
             >
               <Users className="w-5 h-5" />
@@ -105,7 +100,7 @@ export default function DemoPage() {
             icon={Users}
             title="Visual Referral Tree"
             description="Customers see their network grow with animated nodes showing each referral's status"
-            color="amber"
+            color="gold"
             delay={0.6}
           />
           <FeatureCard
@@ -150,8 +145,8 @@ export default function DemoPage() {
               transition={{ delay: 1 + i * 0.1 }}
               className="relative"
             >
-              <div className="text-center p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                <div className="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400
+              <div className="text-center p-4 bg-guardian-navy/30 rounded-xl border border-guardian-gold/20">
+                <div className="w-10 h-10 rounded-full bg-guardian-gold/20 text-guardian-gold
                               font-bold text-lg flex items-center justify-center mx-auto mb-3">
                   {item.step}
                 </div>
@@ -159,7 +154,7 @@ export default function DemoPage() {
                 <p className="text-xs text-slate-400">{item.desc}</p>
               </div>
               {i < 3 && (
-                <div className="hidden md:block absolute top-1/2 -right-2 w-4 h-px bg-slate-600" />
+                <div className="hidden md:block absolute top-1/2 -right-2 w-4 h-px bg-guardian-gold/30" />
               )}
             </motion.div>
           ))}
@@ -177,12 +172,12 @@ export default function DemoPage() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-sm w-full text-center"
+            className="bg-guardian-navy border border-guardian-gold/20 rounded-2xl p-6 max-w-sm w-full text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-48 h-48 bg-white rounded-xl mx-auto mb-4 p-3">
               {/* Placeholder QR code pattern */}
-              <div className="w-full h-full bg-slate-900 rounded-lg flex items-center justify-center">
+              <div className="w-full h-full bg-guardian-navy rounded-lg flex items-center justify-center">
                 <div className="grid grid-cols-5 gap-1">
                   {[...Array(25)].map((_, i) => (
                     <div
@@ -201,8 +196,8 @@ export default function DemoPage() {
             </p>
             <Link
               href="/refer/b2c3d4e5-f6a7-8901-bcde-f12345678901"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400
-                         text-white font-medium rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-guardian-gold hover:bg-guardian-gold/90
+                         text-guardian-navy font-medium rounded-lg transition-colors"
             >
               Simulate Scan
               <ArrowRight className="w-4 h-4" />
@@ -224,11 +219,11 @@ function FeatureCard({
   icon: any;
   title: string;
   description: string;
-  color: 'amber' | 'emerald' | 'sky';
+  color: 'gold' | 'emerald' | 'sky';
   delay: number;
 }) {
   const colorClasses = {
-    amber: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
+    gold: 'bg-guardian-gold/10 border-guardian-gold/30 text-guardian-gold',
     emerald: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
     sky: 'bg-sky-500/10 border-sky-500/30 text-sky-400',
   };

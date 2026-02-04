@@ -16,6 +16,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DollarSign, Users, TrendingUp, Sparkles, Plus } from 'lucide-react';
 import ReferralNode, { ReferralNodeData, ReferralStatus } from './ReferralNode';
 import AddReferralForm from './AddReferralForm';
+import { ViewToggle, type ViewMode } from './ViewToggle';
+import { ReferralListView } from './ReferralListView';
+import { useViewPreference } from '@/hooks/useViewPreference';
 import { toast } from '@/components/ui/Toast';
 import 'reactflow/dist/style.css';
 
@@ -160,6 +163,7 @@ function ReferralTreeInner({ referrals: initialReferrals = DEMO_REFERRALS }: Ref
   const [referrals, setReferrals] = useState<ReferralNodeData[]>(initialReferrals);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [view, setView] = useViewPreference('tree');
 
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
     () => calculateTreeLayout(referrals),
@@ -225,6 +229,11 @@ function ReferralTreeInner({ referrals: initialReferrals = DEMO_REFERRALS }: Ref
         className="px-4 py-4 border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-sm"
       >
         <div className="max-w-lg mx-auto">
+          {/* View Toggle */}
+          <div className="flex justify-center mb-4">
+            <ViewToggle view={view} onChange={setView} />
+          </div>
+
           {/* Earnings highlight */}
           <div className="text-center mb-4">
             <motion.div
@@ -270,67 +279,92 @@ function ReferralTreeInner({ referrals: initialReferrals = DEMO_REFERRALS }: Ref
         </div>
       </motion.div>
 
-      {/* Tree Visualization */}
-      <div className="flex-1 relative">
-        <AnimatePresence>
-          {isLoaded && (
+      {/* View Content */}
+      <div className="flex-1 relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {view === 'tree' ? (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              key="tree-view"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
               className="absolute inset-0"
             >
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onInit={onInit}
-                nodeTypes={nodeTypes}
-                connectionLineType={ConnectionLineType.SmoothStep}
-                fitView
-                fitViewOptions={{ padding: 0.3 }}
-                minZoom={0.3}
-                maxZoom={1.5}
-                defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
-                proOptions={{ hideAttribution: true }}
-                className="touch-pan-y"
+              {/* Tree Visualization */}
+              <AnimatePresence>
+                {isLoaded && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute inset-0"
+                  >
+                    <ReactFlow
+                      nodes={nodes}
+                      edges={edges}
+                      onNodesChange={onNodesChange}
+                      onEdgesChange={onEdgesChange}
+                      onInit={onInit}
+                      nodeTypes={nodeTypes}
+                      connectionLineType={ConnectionLineType.SmoothStep}
+                      fitView
+                      fitViewOptions={{ padding: 0.3 }}
+                      minZoom={0.3}
+                      maxZoom={1.5}
+                      defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+                      proOptions={{ hideAttribution: true }}
+                      className="touch-pan-y"
+                    >
+                      <Background
+                        color="#334155"
+                        gap={20}
+                        size={1}
+                        className="opacity-30"
+                      />
+                      <Controls
+                        className="!bg-slate-800/80 !border-slate-700 !rounded-lg !shadow-xl"
+                        showInteractive={false}
+                      />
+                    </ReactFlow>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Legend */}
+              <motion.div
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="absolute bottom-4 left-4 p-3 bg-slate-900/90 backdrop-blur-sm
+                           border border-slate-700/50 rounded-lg shadow-xl"
               >
-                <Background
-                  color="#334155"
-                  gap={20}
-                  size={1}
-                  className="opacity-30"
-                />
-                <Controls
-                  className="!bg-slate-800/80 !border-slate-700 !rounded-lg !shadow-xl"
-                  showInteractive={false}
-                />
-              </ReactFlow>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-medium">
+                  Status Legend
+                </p>
+                <div className="space-y-1.5">
+                  <LegendItem color="slate" label="Submitted" />
+                  <LegendItem color="sky" label="Contacted" />
+                  <LegendItem color="amber" label="Quoted" />
+                  <LegendItem color="emerald" label="Closed" />
+                </div>
+              </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="list-view"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+              className="absolute inset-0"
+            >
+              <ReferralListView referrals={referrals} className="h-full" />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Legend */}
-        <motion.div
-          initial={{ x: 20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="absolute bottom-4 left-4 p-3 bg-slate-900/90 backdrop-blur-sm
-                     border border-slate-700/50 rounded-lg shadow-xl"
-        >
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-medium">
-            Status Legend
-          </p>
-          <div className="space-y-1.5">
-            <LegendItem color="slate" label="Submitted" />
-            <LegendItem color="sky" label="Contacted" />
-            <LegendItem color="amber" label="Quoted" />
-            <LegendItem color="emerald" label="Closed" />
-          </div>
-        </motion.div>
-
-        {/* Add Referral CTA */}
+        {/* Add Referral CTA - Always visible */}
         <motion.button
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -338,10 +372,10 @@ function ReferralTreeInner({ referrals: initialReferrals = DEMO_REFERRALS }: Ref
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsFormOpen(true)}
-          className="absolute bottom-4 right-4 px-4 py-3
-                     bg-gradient-to-r from-amber-500 to-amber-600
-                     hover:from-amber-400 hover:to-amber-500
-                     text-white font-semibold rounded-xl shadow-lg shadow-amber-500/30
+          className="absolute bottom-4 right-4 px-4 py-3 z-10
+                     bg-gradient-to-r from-guardian-gold to-guardian-orange
+                     hover:from-guardian-gold/90 hover:to-guardian-orange/90
+                     text-guardian-navy font-semibold rounded-xl shadow-lg shadow-guardian-gold/30
                      flex items-center gap-2 transition-all"
         >
           <Plus className="w-5 h-5" />

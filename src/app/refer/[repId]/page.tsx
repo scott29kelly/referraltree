@@ -8,6 +8,7 @@ import { getRep, getCustomersByRep } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AppointmentBooking, BookingPrompt } from '@/components/booking/AppointmentBooking';
 import {
   Shield,
   User,
@@ -20,6 +21,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Gift,
+  Calendar,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { Rep, Customer } from '@/types/database';
@@ -46,6 +48,7 @@ export default function ReferralSubmissionPage() {
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [submittedReferrerName, setSubmittedReferrerName] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -158,27 +161,32 @@ export default function ReferralSubmissionPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-8">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', duration: 0.6 }}
-          className="w-full max-w-md text-center"
+          className="w-full max-w-md"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500/30 to-emerald-600/10 flex items-center justify-center mx-auto mb-6 border border-emerald-500/30"
-          >
-            <CheckCircle className="w-12 h-12 text-emerald-400" />
-          </motion.div>
-          <h1 className="text-3xl font-bold text-white mb-3">Thank You!</h1>
-          <p className="text-slate-400 mb-8 text-lg">
-            We&apos;ll be in touch shortly to schedule your free inspection.
-          </p>
-          <div className="p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50">
-            <p className="text-slate-300">
+          {/* Success Message */}
+          <div className="text-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+              className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/30 to-emerald-600/10 flex items-center justify-center mx-auto mb-6 border border-emerald-500/30"
+            >
+              <CheckCircle className="w-10 h-10 text-emerald-400" />
+            </motion.div>
+            <h1 className="text-2xl font-bold text-white mb-2">Thank You, {name}!</h1>
+            <p className="text-slate-400 mb-6">
+              Your referral has been submitted successfully.
+            </p>
+          </div>
+
+          {/* Referrer Info */}
+          <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 mb-6">
+            <p className="text-slate-300 text-center">
               Referred by{' '}
               <span className="font-semibold text-white">{submittedReferrerName}</span>
             </p>
@@ -187,7 +195,36 @@ export default function ReferralSubmissionPage() {
               You&apos;ll earn $125 when your referral becomes a customer!
             </p>
           </div>
+
+          {/* Book Appointment CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <BookingPrompt
+              onBookClick={() => setShowBooking(true)}
+              className="mb-4"
+            />
+          </motion.div>
+
+          {/* Secondary Action */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="text-center text-sm text-slate-500"
+          >
+            We&apos;ll also reach out to schedule if you prefer
+          </motion.p>
         </motion.div>
+
+        {/* Booking Modal */}
+        <AppointmentBooking
+          isOpen={showBooking}
+          onClose={() => setShowBooking(false)}
+          customerName={name}
+        />
       </div>
     );
   }
