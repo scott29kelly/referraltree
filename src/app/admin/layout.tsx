@@ -21,6 +21,7 @@ import {
   ArrowLeftRight,
   PanelLeftClose,
   PanelLeft,
+  ExternalLink,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -47,6 +48,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const { rep, isLoading, signOut } = useRequireAdmin();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // Persist sidebar state
   useEffect(() => {
@@ -248,8 +250,52 @@ export default function AdminLayout({
             </div>
             <div className="flex items-center gap-2">
               <CommandPalette onSignOut={signOut} />
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                <Crown className="w-4 h-4 text-emerald-400" />
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center hover:bg-emerald-500/30 transition-colors"
+                >
+                  <Crown className="w-4 h-4 text-emerald-400" />
+                </button>
+                {showUserMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowUserMenu(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                      <div className="p-3 border-b border-slate-700">
+                        <p className="text-sm font-semibold text-white truncate">{rep?.name || 'Admin'}</p>
+                        <p className="text-xs text-emerald-400">Administrator</p>
+                      </div>
+                      <div className="p-2">
+                        <Link
+                          href="/demo"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          <span className="text-sm">Exit to Customer View</span>
+                        </Link>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                        >
+                          <ArrowLeftRight className="w-4 h-4" />
+                          <span className="text-sm">Switch to Rep View</span>
+                        </Link>
+                        <button
+                          onClick={() => { setShowUserMenu(false); signOut(); }}
+                          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span className="text-sm">Sign Out</span>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
