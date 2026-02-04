@@ -6,7 +6,7 @@ import BulkActions from '@/components/admin/BulkActions';
 import ExportButton from '@/components/admin/ExportButton';
 import DateRangePicker from '@/components/ui/DateRangePicker';
 import { TableSkeleton } from '@/components/ui/skeletons';
-import { NoSearchResultsEmpty } from '@/components/ui/empty-state';
+import { NoSearchResultsEmpty, ErrorEmpty } from '@/components/ui/empty-state';
 import {
   Search,
   ChevronDown,
@@ -41,6 +41,7 @@ export default function AdminReferralsPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [reps, setReps] = useState<Rep[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,13 +57,14 @@ export default function AdminReferralsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const loadData = useCallback(async () => {
+    setError(null);
     try {
       const [mockReferralsData, customersData, repsData] = await Promise.all([
         getReferrals(),
         getCustomers(),
         getReps(),
       ]);
-      
+
       // Also fetch API-submitted referrals
       let apiReferrals: Referral[] = [];
       try {
@@ -74,19 +76,20 @@ export default function AdminReferralsPage() {
       } catch (err) {
         console.error('Error fetching API referrals:', err);
       }
-      
+
       // Combine API referrals (newer) with mock data, avoiding duplicates
       const apiIds = new Set(apiReferrals.map(r => r.id));
       const combinedReferrals = [
         ...apiReferrals,
         ...mockReferralsData.filter(r => !apiIds.has(r.id))
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      
+
       setReferrals(combinedReferrals);
       setCustomers(customersData);
       setReps(repsData);
     } catch (error) {
       console.error('Error loading data:', error);
+      setError('Failed to load referrals. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -271,6 +274,28 @@ export default function AdminReferralsPage() {
           </div>
         </div>
         <TableSkeleton rows={8} columns={6} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center border border-emerald-500/20">
+              <FileText className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">All Referrals</h1>
+              <p className="text-slate-400">View and manage all referrals</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 p-8">
+          <ErrorEmpty onRetry={loadData} />
+        </div>
       </div>
     );
   }

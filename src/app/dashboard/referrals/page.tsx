@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getReferralsByRep, getCustomersByRep, updateReferralStatus } from '@/lib/data';
 import ReferralTable from '@/components/dashboard/ReferralTable';
 import { TableSkeleton, DashboardStatsSkeleton } from '@/components/ui/skeletons';
+import { ErrorEmpty } from '@/components/ui/empty-state';
 import type { Referral, Customer, ReferralStatus } from '@/types/database';
 
 export default function ReferralsPage() {
@@ -12,10 +13,15 @@ export default function ReferralsPage() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
-    if (!rep) return;
+    if (!rep) {
+      setLoading(false);
+      return;
+    }
 
+    setError(null);
     try {
       const [mockReferralsData, customersData] = await Promise.all([
         getReferralsByRep(rep.id),
@@ -48,16 +54,17 @@ export default function ReferralsPage() {
       setCustomers(customersData);
     } catch (error) {
       console.error('Error loading referrals:', error);
+      setError('Failed to load referrals. Please try again.');
     } finally {
       setLoading(false);
     }
   }, [rep]);
 
   useEffect(() => {
-    if (rep) {
+    if (!authLoading) {
       loadData();
     }
-  }, [rep, loadData]);
+  }, [authLoading, loadData]);
 
   const handleStatusChange = async (id: string, status: ReferralStatus) => {
     // Optimistically update UI
@@ -99,6 +106,22 @@ export default function ReferralsPage() {
         </div>
         <DashboardStatsSkeleton />
         <TableSkeleton rows={5} columns={4} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Referrals</h1>
+          <p className="text-slate-400 mt-1">
+            Manage and track your referral pipeline
+          </p>
+        </div>
+        <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 p-8">
+          <ErrorEmpty onRetry={loadData} />
+        </div>
       </div>
     );
   }
