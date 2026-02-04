@@ -23,6 +23,7 @@ import {
   Mail,
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { getReferralUrl } from '@/lib/utils';
 
 interface QRCodeSheetProps {
   repId: string;
@@ -35,8 +36,8 @@ export function QRCodeSheet({ repId, repName, children, className }: QRCodeSheet
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const referralUrl = `${baseUrl}/refer/${repId}`;
+  // Use centralized URL utility for production-safe referral links
+  const referralUrl = getReferralUrl(repId);
 
   const handleCopy = async () => {
     try {
