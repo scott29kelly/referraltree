@@ -1,9 +1,22 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactFlow, {
+  Node,
+  Edge,
+  Background,
+  Controls,
+  useNodesState,
+  useEdgesState,
+  ConnectionLineType,
+  MarkerType,
+  ReactFlowProvider,
+} from 'reactflow';
 import { useAuth } from '@/hooks/useAuth';
 import { getCustomersByRep, getReferralsByRep } from '@/lib/data';
+import { ReferralNode, ViewToggle, type ReferralNodeData, type ReferralStatus as TreeReferralStatus } from '@/components/referral-tree';
+import { useViewPreference } from '@/hooks/useViewPreference';
 import {
   DollarSign,
   Users,
@@ -25,6 +38,7 @@ import {
 import Link from 'next/link';
 import { clsx } from 'clsx';
 import type { Customer, Referral, ReferralStatus } from '@/types/database';
+import 'reactflow/dist/style.css';
 
 const REFERRAL_BONUS = 125;
 
@@ -49,12 +63,113 @@ interface TreeNode {
   notes?: string | null;
 }
 
-export default function TreePage() {
+const nodeTypes = {
+  referral: ReferralNode,
+};
+
+// Calculate ReactFlow tree layout from customers and referrals
+function calculateRepTreeLayout(
+  customers: Customer[],
+  referrals: Referral[]
+): { nodes: Node<ReferralNodeData>[]; edges: Edge[] } {
+  const nodes: Node<ReferralNodeData>[] = [];
+  const edges: Edge[] = [];
+
+  if (customers.length === 0) return { nodes, edges };
+
+  const referralsByCustomer = new Map<string, Referral[]>();
+  referrals.forEach((r) => {
+    const existing = referralsByCustomer.get(r.referrer_id) || [];
+    existing.push(r);
+    referralsByCustomer.set(r.referrer_id, existing);
+  });
+
+  const nodeWidth = 200;
+  const horizontalGap = 40;
+  const verticalGap = 180;
+
+  const totalCustomerWidth =
+    customers.length * nodeWidth + (customers.length - 1) * horizontalGap;
+  const customerStartX = -totalCustomerWidth / 2;
+
+  customers.forEach((customer, customerIndex) => {
+    const customerX = customerStartX + customerIndex * (nodeWidth + horizontalGap);
+    const customerId = `customer-${customer.id}`;
+
+    nodes.push({
+      id: customerId,
+      type: 'referral',
+      position: { x: customerX, y: 0 },
+      data: {
+        id: customerId,
+        name: customer.name,
+        phone: customer.phone || undefined,
+        email: customer.email || undefined,
+        status: 'sold' as TreeReferralStatus,
+        submittedAt: new Date(customer.created_at),
+        isRoot: true,
+      },
+    });
+
+    const customerReferrals = referralsByCustomer.get(customer.id) || [];
+    if (customerReferrals.length > 0) {
+      const refWidth =
+        customerReferrals.length * nodeWidth +
+        (customerReferrals.length - 1) * horizontalGap;
+      const refStartX = customerX + nodeWidth / 2 - refWidth / 2;
+
+      customerReferrals.forEach((referral, refIndex) => {
+        const refX = refStartX + refIndex * (nodeWidth + horizontalGap);
+        const referralId = `referral-${referral.id}`;
+
+        nodes.push({
+          id: referralId,
+          type: 'referral',
+          position: { x: refX, y: verticalGap },
+          data: {
+            id: referralId,
+            name: referral.referee_name,
+            phone: referral.referee_phone || undefined,
+            email: referral.referee_email || undefined,
+            status: referral.status as TreeReferralStatus,
+            submittedAt: new Date(referral.created_at),
+            isRoot: false,
+            earnings: referral.status === 'sold' ? REFERRAL_BONUS : undefined,
+          },
+        });
+
+        const statusColor =
+          referral.status === 'sold'
+            ? '#10b981'
+            : referral.status === 'quoted'
+            ? '#f59e0b'
+            : referral.status === 'contacted'
+            ? '#0ea5e9'
+            : '#64748b';
+
+        edges.push({
+          id: `edge-${customerId}-${referralId}`,
+          source: customerId,
+          target: referralId,
+          type: 'smoothstep',
+          animated: referral.status !== 'sold',
+          style: { stroke: statusColor, strokeWidth: 2 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: statusColor },
+        });
+      });
+    }
+  });
+
+  return { nodes, edges };
+}
+
+function TreePageInner() {
   const { rep, isLoading: authLoading } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [view, setView] = useViewPreference('tree');
 
   useEffect(() => {
     async function loadData() {
@@ -181,6 +296,25 @@ export default function TreePage() {
     return { totalCustomers: customers.length, totalReferrals: referrals.length, soldCount, totalEarnings: soldCount * REFERRAL_BONUS };
   }, [customers, referrals]);
 
+  // ReactFlow tree layout
+  const { nodes: treeNodes, edges: treeEdges } = useMemo(
+    () => calculateRepTreeLayout(customers, referrals),
+    [customers, referrals]
+  );
+
+  const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(treeNodes);
+  const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(treeEdges);
+
+  useEffect(() => {
+    const { nodes: newNodes, edges: newEdges } = calculateRepTreeLayout(customers, referrals);
+    setFlowNodes(newNodes);
+    setFlowEdges(newEdges);
+  }, [customers, referrals, setFlowNodes, setFlowEdges]);
+
+  const onFlowInit = useCallback((instance: any) => {
+    setTimeout(() => instance.fitView({ padding: 0.3, duration: 800 }), 300);
+  }, []);
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -281,35 +415,122 @@ export default function TreePage() {
         </div>
       </div>
 
-      {/* Tree Container */}
-      <div className="rounded-3xl bg-gradient-to-br from-slate-900/80 to-slate-950/80 border border-slate-700/50 backdrop-blur-sm p-8">
-        <div className="max-w-4xl mx-auto space-y-4">
-          {/* Start directly with customers, skip the rep node */}
-          {tree.children.map(customerNode => (
-            <TreeNodeCard key={customerNode.id} node={customerNode} expanded={expandedNodes} onToggle={toggleNode} depth={0} />
-          ))}
-        </div>
+      {/* View Toggle */}
+      <div className="flex justify-center mb-6">
+        <ViewToggle view={view} onChange={setView} />
       </div>
 
-      {/* Legend */}
-      <div className="flex justify-center gap-8 mt-8 flex-wrap text-sm">
-        <div className="flex items-center gap-6">
-          <span className="flex items-center gap-2 text-slate-400">
-            <span className="w-4 h-4 rounded-lg bg-guardian-gold/30 border border-guardian-gold" /> Rep
-          </span>
-          <span className="flex items-center gap-2 text-slate-400">
-            <span className="w-4 h-4 rounded-lg bg-sky-500/30 border border-sky-500" /> Customer
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          {Object.entries(statusConfig).map(([key, config]) => (
-            <span key={key} className="flex items-center gap-1.5 text-slate-500">
-              <span className={clsx('w-2.5 h-2.5 rounded-full', config.border.replace('border-', 'bg-').replace('/40', ''))} />
-              {config.label}
-            </span>
-          ))}
-        </div>
-      </div>
+      {/* View Content */}
+      <AnimatePresence mode="wait">
+        {view === 'tree' ? (
+          <motion.div
+            key="tree-view"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="h-[500px] rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-slate-700/50 overflow-hidden relative">
+              {customers.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <Network className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                    <p className="text-slate-400">No network data yet</p>
+                  </div>
+                </div>
+              ) : (
+                <ReactFlow
+                  nodes={flowNodes}
+                  edges={flowEdges}
+                  onNodesChange={onNodesChange}
+                  onEdgesChange={onEdgesChange}
+                  onInit={onFlowInit}
+                  nodeTypes={nodeTypes}
+                  connectionLineType={ConnectionLineType.SmoothStep}
+                  fitView
+                  fitViewOptions={{ padding: 0.3 }}
+                  minZoom={0.2}
+                  maxZoom={1.5}
+                  proOptions={{ hideAttribution: true }}
+                  className="touch-pan-y"
+                >
+                  <Background color="#334155" gap={20} size={1} className="opacity-30" />
+                  <Controls
+                    className="!bg-slate-800/80 !border-slate-700 !rounded-lg !shadow-xl"
+                    showInteractive={false}
+                  />
+                </ReactFlow>
+              )}
+
+              {/* Legend */}
+              <div className="absolute bottom-4 left-4 p-3 bg-slate-900/90 backdrop-blur-sm border border-slate-700/50 rounded-lg shadow-xl">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-medium">
+                  Status Legend
+                </p>
+                <div className="space-y-1.5">
+                  <FlowLegendItem color="slate" label="Submitted" />
+                  <FlowLegendItem color="sky" label="Contacted" />
+                  <FlowLegendItem color="amber" label="Quoted" />
+                  <FlowLegendItem color="emerald" label="Closed" />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="list-view"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Card-based list view */}
+            <div className="rounded-3xl bg-gradient-to-br from-slate-900/80 to-slate-950/80 border border-slate-700/50 backdrop-blur-sm p-8">
+              <div className="max-w-4xl mx-auto space-y-4">
+                {tree.children.map(customerNode => (
+                  <TreeNodeCard key={customerNode.id} node={customerNode} expanded={expandedNodes} onToggle={toggleNode} depth={0} />
+                ))}
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex justify-center gap-8 mt-8 flex-wrap text-sm">
+              <div className="flex items-center gap-6">
+                <span className="flex items-center gap-2 text-slate-400">
+                  <span className="w-4 h-4 rounded-lg bg-guardian-gold/30 border border-guardian-gold" /> Rep
+                </span>
+                <span className="flex items-center gap-2 text-slate-400">
+                  <span className="w-4 h-4 rounded-lg bg-sky-500/30 border border-sky-500" /> Customer
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                {Object.entries(statusConfig).map(([key, config]) => (
+                  <span key={key} className="flex items-center gap-1.5 text-slate-500">
+                    <span className={clsx('w-2.5 h-2.5 rounded-full', config.border.replace('border-', 'bg-').replace('/40', ''))} />
+                    {config.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function FlowLegendItem({ color, label }: { color: string; label: string }) {
+  const colorClasses: Record<string, string> = {
+    slate: 'bg-slate-500',
+    sky: 'bg-sky-500',
+    amber: 'bg-amber-500',
+    emerald: 'bg-emerald-500',
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-2.5 h-2.5 rounded-full ${colorClasses[color]}`} />
+      <span className="text-xs text-slate-400">{label}</span>
     </div>
   );
 }
@@ -454,5 +675,13 @@ function TreeNodeCard({ node, expanded, onToggle, depth }: { node: TreeNode; exp
         )}
       </AnimatePresence>
     </motion.div>
+  );
+}
+
+export default function TreePage() {
+  return (
+    <ReactFlowProvider>
+      <TreePageInner />
+    </ReactFlowProvider>
   );
 }
