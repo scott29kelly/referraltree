@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
 interface PageTransitionProps {
@@ -10,30 +10,6 @@ interface PageTransitionProps {
 
 // Custom ease curve for smooth feel
 const smoothEase = 'easeOut' as const;
-
-// Smooth fade and slide animation variants
-const pageVariants: Variants = {
-  initial: {
-    opacity: 0,
-    y: 8,
-  },
-  enter: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: smoothEase,
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -8,
-    transition: {
-      duration: 0.2,
-      ease: smoothEase,
-    },
-  },
-};
 
 // Stagger children animation for content
 const containerVariants: Variants = {
@@ -72,25 +48,26 @@ const itemVariants: Variants = {
 };
 
 /**
- * PageTransition - Wraps page content with smooth enter/exit animations
- * Uses path as key to trigger animations on navigation
+ * PageTransition - Wraps page content with smooth enter animations on navigation
+ * Uses path as key to trigger re-mount and enter animation on route change.
+ * Note: AnimatePresence mode="wait" is intentionally avoided here because
+ * Next.js App Router replaces layout children immediately on navigation,
+ * which can cause exit animations to get stuck (blank page) and corrupt
+ * AnimatePresence internal state (breaking subsequent navigations).
  */
 export function PageTransition({ children, className }: PageTransitionProps) {
   const pathname = usePathname();
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={pathname}
-        initial="initial"
-        animate="enter"
-        exit="exit"
-        variants={pageVariants}
-        className={className}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      key={pathname}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: smoothEase }}
+      className={className}
+    >
+      {children}
+    </motion.div>
   );
 }
 
