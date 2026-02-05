@@ -268,6 +268,175 @@ body {
   transform: translateY(-2px);
 }
 
+/* ============================================
+   PREMIUM BUTTON SYSTEM - New Variants
+   ============================================ */
+
+/* Animated Gradient Button */
+@keyframes btn-gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.btn-gradient-animated {
+  background: linear-gradient(
+    135deg,
+    #1E3A5F 0%,
+    #2B5797 25%,
+    #4A90D9 50%,
+    #2B5797 75%,
+    #1E3A5F 100%
+  );
+  background-size: 300% 300%;
+  animation: btn-gradient-shift 4s ease infinite;
+  transition: all 0.3s ease-out;
+}
+
+.btn-gradient-animated:hover {
+  animation-duration: 2s;
+  filter: brightness(1.1);
+}
+
+/* Glow Ring Button Animation */
+@keyframes btn-glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 5px rgba(43, 87, 151, 0.4),
+      0 0 20px rgba(43, 87, 151, 0.2),
+      0 0 35px rgba(43, 87, 151, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 10px rgba(43, 87, 151, 0.6),
+      0 0 30px rgba(43, 87, 151, 0.4),
+      0 0 50px rgba(43, 87, 151, 0.2);
+  }
+}
+
+.btn-glow-ring {
+  position: relative;
+  animation: btn-glow-pulse 2s ease-in-out infinite;
+}
+
+.btn-glow-ring::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #4A90D9, #2B5797, #1E3A5F, #2B5797);
+  background-size: 200% 200%;
+  animation: btn-gradient-shift 3s ease infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-glow-ring:hover::before {
+  opacity: 1;
+}
+
+/* Outline Glow Button */
+@keyframes btn-outline-glow-pulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 10px rgba(74, 144, 217, 0.1),
+      0 0 10px rgba(74, 144, 217, 0.15);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 20px rgba(74, 144, 217, 0.2),
+      0 0 25px rgba(74, 144, 217, 0.3);
+  }
+}
+
+.btn-outline-glow {
+  transition: all 0.3s ease-out;
+}
+
+.btn-outline-glow:hover {
+  animation: btn-outline-glow-pulse 1.5s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(74, 144, 217, 0.5);
+}
+
+/* Premium Gold Button with Shine */
+@keyframes btn-shine-sweep {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.btn-premium {
+  background-size: 200% 100%;
+  animation: btn-gold-shimmer 3s ease infinite;
+}
+
+@keyframes btn-gold-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.btn-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transform: translateX(-100%) skewX(-15deg);
+}
+
+.btn-premium:hover .btn-shine {
+  animation: btn-shine-sweep 0.75s ease-in-out;
+}
+
+/* Button Press Effect Enhancement */
+.btn-gradient-animated:active,
+.btn-glow-ring:active,
+.btn-outline-glow:active,
+.btn-premium:active {
+  transform: scale(0.97);
+  filter: brightness(0.95);
+}
+
+/* Disabled State for New Variants */
+.btn-gradient-animated:disabled,
+.btn-glow-ring:disabled,
+.btn-outline-glow:disabled,
+.btn-premium:disabled {
+  animation: none;
+  filter: grayscale(0.5);
+  cursor: not-allowed;
+}
+
+.btn-gradient-animated:disabled::before,
+.btn-glow-ring:disabled::before {
+  display: none;
+}
+
 /* Premium Card Hover */
 .card-hover {
   transition: all 0.3s ease-out;
