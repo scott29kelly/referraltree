@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import DemoViewToggle from '@/components/ui/DemoViewToggle';
 import './globals.css';
+import './guardian-typography-upgrade.css';
+import './guardian-atmosphere-upgrade.css';
+import './guardian-composition-upgrade.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

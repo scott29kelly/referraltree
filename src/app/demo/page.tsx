@@ -36,7 +36,7 @@ export default function DemoPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-4xl md:text-5xl font-bold text-white mb-4"
+            className="text-4xl md:text-5xl font-bold text-white mb-4 font-display"
           >
             Turn Happy Customers Into
             <span className="block mt-2 bg-gradient-to-r from-guardian-gold to-guardian-orange bg-clip-text text-transparent">
@@ -126,7 +126,7 @@ export default function DemoPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9 }}
-          className="text-2xl font-bold text-white text-center mb-12"
+          className="text-2xl font-bold text-white text-center mb-12 font-display"
         >
           How It Works
         </motion.h3>
@@ -147,7 +147,7 @@ export default function DemoPage() {
             >
               <div className="text-center p-4 bg-guardian-navy/30 rounded-xl border border-guardian-gold/20">
                 <div className="w-10 h-10 rounded-full bg-guardian-gold/20 text-guardian-gold
-                              font-bold text-lg flex items-center justify-center mx-auto mb-3">
+                              font-bold text-lg flex items-center justify-center mx-auto mb-3 step-number">
                   {item.step}
                 </div>
                 <h4 className="font-semibold text-white text-sm mb-1">{item.title}</h4>

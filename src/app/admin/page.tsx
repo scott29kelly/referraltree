@@ -103,12 +103,12 @@ export default function AdminHomePage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Admin Overview</h1>
+        <h1 className="text-2xl font-bold text-white font-display">Admin Overview</h1>
         <p className="text-slate-400 mt-1">Company-wide performance metrics</p>
       </div>
 
       {/* Company Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stats-grid">
         <StatsCard
           title="Total Referrals"
           value={stats?.total_referrals || 0}

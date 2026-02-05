@@ -153,7 +153,7 @@ export function Leaderboard({
   const displayData = expanded ? sortedData : sortedData.slice(0, 5);
 
   return (
-    <div className={cn('rounded-xl bg-slate-800/50 border border-slate-700/50 overflow-hidden', className)}>
+    <div data-leaderboard className={cn('rounded-xl bg-slate-800/50 border border-slate-700/50 overflow-hidden', className)}>
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-700/50">
         <div className="flex items-center justify-between">

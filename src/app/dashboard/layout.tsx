@@ -88,7 +88,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div data-layout="dashboard" className="min-h-screen bg-slate-950 flex">
       {/* Sidebar - Desktop Only */}
       <aside
         className={clsx(
@@ -110,7 +110,7 @@ export default function DashboardLayout({
             </div>
             {!isCollapsed && (
               <div className="overflow-hidden">
-                <h1 className="font-bold text-white tracking-tight">Guardianship</h1>
+                <h1 className="font-bold text-white tracking-tight font-display">Guardianship</h1>
                 <p className="text-xs text-slate-400">Rep Dashboard</p>
               </div>
             )}
@@ -236,7 +236,7 @@ export default function DashboardLayout({
               <div className="w-8 h-8 rounded-lg bg-guardian-gold/10 flex items-center justify-center">
                 <Shield className="w-5 h-5 text-guardian-gold" />
               </div>
-              <span className="font-semibold text-white">Guardianship</span>
+              <span className="font-semibold text-white font-display">Guardianship</span>
             </div>
             <div className="flex items-center gap-2">
               <NetworkStatusIndicator showLabel />

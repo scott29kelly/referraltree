@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ReactFlow, {
   Node,
   Edge,
@@ -33,7 +33,8 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { getRep, getCustomersByRep, getReferralsByRep, getDashboardStats } from '@/lib/data';
-import { ReferralNode, type ReferralNodeData, type ReferralStatus as TreeReferralStatus } from '@/components/referral-tree';
+import { ReferralNode, ViewToggle, type ReferralNodeData, type ReferralStatus as TreeReferralStatus } from '@/components/referral-tree';
+import { useViewPreference } from '@/hooks/useViewPreference';
 import type { Rep, Customer, Referral, DashboardStats, ReferralStatus } from '@/types/database';
 import 'reactflow/dist/style.css';
 
@@ -148,7 +149,8 @@ function RepDetailInner() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'referrals' | 'tree'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'referrals'>('overview');
+  const [view, setView] = useViewPreference('tree');
 
   useEffect(() => {
     async function loadData() {
@@ -360,8 +362,8 @@ function RepDetailInner() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-700/50 pb-2">
-        {(['overview', 'referrals', 'tree'] as const).map((tab) => (
+      <div className="flex items-center gap-2 border-b border-slate-700/50 pb-2">
+        {(['overview', 'referrals'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -374,9 +376,13 @@ function RepDetailInner() {
           >
             {tab === 'overview' && 'Overview'}
             {tab === 'referrals' && 'All Referrals'}
-            {tab === 'tree' && 'Network Tree'}
           </button>
         ))}
+        {activeTab === 'referrals' && (
+          <div className="ml-auto">
+            <ViewToggle view={view} onChange={setView} />
+          </div>
+        )}
       </div>
 
       {/* Tab Content */}
@@ -452,75 +458,106 @@ function RepDetailInner() {
       )}
 
       {activeTab === 'referrals' && (
-        <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-700/50">
-                <th className="text-left p-4 text-sm font-medium text-slate-400">Name</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-400">Contact</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-400">Status</th>
-                <th className="text-left p-4 text-sm font-medium text-slate-400">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {referrals.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-12 text-slate-400">
-                    No referrals yet
-                  </td>
-                </tr>
-              ) : (
-                referrals.map((referral) => (
-                  <tr key={referral.id} className="border-b border-slate-700/30 hover:bg-slate-800/30">
-                    <td className="p-4">
-                      <p className="font-medium text-white">{referral.referee_name}</p>
-                    </td>
-                    <td className="p-4">
-                      <p className="text-sm text-slate-400">{referral.referee_phone || referral.referee_email || '-'}</p>
-                    </td>
-                    <td className="p-4">
-                      <StatusBadge status={referral.status} />
-                    </td>
-                    <td className="p-4 text-sm text-slate-400">
-                      {new Date(referral.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {activeTab === 'tree' && (
-        <div className="h-[500px] rounded-xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-slate-700/50 overflow-hidden">
-          {customers.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <Network className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                <p className="text-slate-400">No network data yet</p>
-              </div>
-            </div>
-          ) : (
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onInit={onInit}
-              nodeTypes={nodeTypes}
-              connectionLineType={ConnectionLineType.SmoothStep}
-              fitView
-              fitViewOptions={{ padding: 0.3 }}
-              minZoom={0.2}
-              maxZoom={1.5}
-              proOptions={{ hideAttribution: true }}
+        <AnimatePresence mode="wait">
+          {view === 'tree' ? (
+            <motion.div
+              key="tree-view"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
             >
-              <Background color="#334155" gap={20} size={1} className="opacity-30" />
-              <Controls className="!bg-slate-800/80 !border-slate-700 !rounded-lg" showInteractive={false} />
-            </ReactFlow>
+              <div className="h-[500px] rounded-xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-slate-700/50 overflow-hidden relative">
+                {customers.length === 0 ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <Network className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                      <p className="text-slate-400">No network data yet</p>
+                    </div>
+                  </div>
+                ) : (
+                  <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onInit={onInit}
+                    nodeTypes={nodeTypes}
+                    connectionLineType={ConnectionLineType.SmoothStep}
+                    fitView
+                    fitViewOptions={{ padding: 0.3 }}
+                    minZoom={0.2}
+                    maxZoom={1.5}
+                    proOptions={{ hideAttribution: true }}
+                  >
+                    <Background color="#334155" gap={20} size={1} className="opacity-30" />
+                    <Controls className="!bg-slate-800/80 !border-slate-700 !rounded-lg" showInteractive={false} />
+                  </ReactFlow>
+                )}
+
+                {/* Legend */}
+                <div className="absolute bottom-4 left-4 p-3 bg-slate-900/90 backdrop-blur-sm border border-slate-700/50 rounded-lg shadow-xl">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-medium">
+                    Status Legend
+                  </p>
+                  <div className="space-y-1.5">
+                    <LegendItem color="slate" label="Submitted" />
+                    <LegendItem color="sky" label="Contacted" />
+                    <LegendItem color="amber" label="Quoted" />
+                    <LegendItem color="emerald" label="Closed" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="list-view"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-700/50">
+                      <th className="text-left p-4 text-sm font-medium text-slate-400">Name</th>
+                      <th className="text-left p-4 text-sm font-medium text-slate-400">Contact</th>
+                      <th className="text-left p-4 text-sm font-medium text-slate-400">Status</th>
+                      <th className="text-left p-4 text-sm font-medium text-slate-400">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {referrals.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="text-center py-12 text-slate-400">
+                          No referrals yet
+                        </td>
+                      </tr>
+                    ) : (
+                      referrals.map((referral) => (
+                        <tr key={referral.id} className="border-b border-slate-700/30 hover:bg-slate-800/30">
+                          <td className="p-4">
+                            <p className="font-medium text-white">{referral.referee_name}</p>
+                          </td>
+                          <td className="p-4">
+                            <p className="text-sm text-slate-400">{referral.referee_phone || referral.referee_email || '-'}</p>
+                          </td>
+                          <td className="p-4">
+                            <StatusBadge status={referral.status} />
+                          </td>
+                          <td className="p-4 text-sm text-slate-400">
+                            {new Date(referral.created_at).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       )}
     </div>
   );
@@ -570,6 +607,22 @@ function PipelineRow({ label, count, color }: { label: string; count: number; co
         <span className="text-slate-300">{label}</span>
       </div>
       <span className="font-semibold text-white">{count}</span>
+    </div>
+  );
+}
+
+function LegendItem({ color, label }: { color: string; label: string }) {
+  const colorClasses: Record<string, string> = {
+    slate: 'bg-slate-500',
+    sky: 'bg-sky-500',
+    amber: 'bg-amber-500',
+    emerald: 'bg-emerald-500',
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-2.5 h-2.5 rounded-full ${colorClasses[color]}`} />
+      <span className="text-xs text-slate-400">{label}</span>
     </div>
   );
 }
