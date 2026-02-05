@@ -1,0 +1,355 @@
+/*
+ * GUARDIAN COMPOSITION UPGRADE
+ * ==============================
+ * Drop-in enhancement — import AFTER globals.css
+ * Adds: Grid-breaking earnings hero, z-depth card overlaps,
+ *        spatial drama for key dashboard moments
+ * 
+ * Installation:
+ * 1. Place this file in the project root or src/app/
+ * 2. Import in layout.tsx: import './guardian-composition-upgrade.css'
+ *    (after globals.css, typography, and atmosphere upgrades)
+ * 
+ * NOTE: Some of these selectors are intentionally broad CSS-based
+ *       to work without modifying React components. For tighter
+ *       integration, add the utility classes directly to components.
+ */
+
+/* ========================================
+   EARNINGS HERO — GRID BREAKER
+   The customer's total referral earnings is
+   the single most emotionally charged element.
+   ($125 per closed referral, paid to the
+   referring customer — NOT to sales reps.)
+   It should dominate the viewport on first load
+   to reinforce the reward loop.
+   
+   Apply .earnings-hero to the earnings card
+   container, or it will auto-detect based on
+   common layout patterns.
+   ======================================== */
+
+.earnings-hero,
+[data-earnings-hero] {
+  /* Break out of parent grid/container */
+  grid-column: 1 / -1;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding: 2.5rem 1.5rem 2rem;
+  position: relative;
+  
+  /* Ambient glow behind the number */
+  background: 
+    radial-gradient(
+      ellipse 70% 80% at 50% 40%,
+      rgba(16, 185, 129, 0.08) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.6) 0%,
+      rgba(15, 23, 42, 0.3) 100%
+    );
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1.25rem;
+  overflow: visible;
+}
+
+/* The earnings number itself */
+.earnings-hero .earnings-number,
+.earnings-hero [data-stat-value],
+.earnings-hero .text-5xl,
+.earnings-hero .text-6xl,
+.earnings-hero .text-7xl {
+  font-size: clamp(3rem, 8vw, 5rem);
+  line-height: 1;
+  background: linear-gradient(
+    135deg,
+    #10b981 0%,
+    #34d399 40%,
+    #D4A656 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.3));
+}
+
+/* Progress bar ambient extension */
+.earnings-hero .progress-bar,
+.earnings-hero [role="progressbar"],
+.earnings-hero .progress-gradient-emerald,
+.earnings-hero .progress-gradient-gold {
+  height: 6px;
+  border-radius: 3px;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .earnings-hero,
+  [data-earnings-hero] {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding: 3rem 2rem 2.5rem;
+  }
+  
+  .earnings-hero .earnings-number,
+  .earnings-hero [data-stat-value] {
+    font-size: clamp(4rem, 6vw, 6rem);
+  }
+}
+
+/* ========================================
+   STATS CARDS — Z-DEPTH STAGGER
+   Cards at different visual depths create
+   spatial interest. Even subtle differences
+   (1-2px translate, shadow variation) make
+   the grid feel alive.
+   ======================================== */
+
+/* Give stats cards variable depth */
+.stats-grid > *:nth-child(1),
+.dashboard-stats > *:nth-child(1) {
+  transform: translateY(0);
+  z-index: 3;
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.stats-grid > *:nth-child(2),
+.dashboard-stats > *:nth-child(2) {
+  transform: translateY(4px);
+  z-index: 2;
+  box-shadow: 
+    0 12px 36px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.stats-grid > *:nth-child(3),
+.dashboard-stats > *:nth-child(3) {
+  transform: translateY(8px);
+  z-index: 1;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.stats-grid > *:nth-child(4),
+.dashboard-stats > *:nth-child(4) {
+  transform: translateY(4px);
+  z-index: 2;
+  box-shadow: 
+    0 12px 36px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* On hover, card rises to top depth */
+.stats-grid > *:hover,
+.dashboard-stats > *:hover {
+  transform: translateY(-2px) !important;
+  z-index: 10 !important;
+  box-shadow: 
+    0 20px 56px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ========================================
+   WALLET CARD — OVERLAP TREATMENT
+   The customer's wallet/payout card shows
+   pending vs. paid referral earnings ($125
+   per closed deal). It overlaps slightly
+   with the stats row below, creating visual
+   connection between their earnings and
+   referral activity.
+   ======================================== */
+
+.wallet-card,
+[data-wallet-card] {
+  position: relative;
+  z-index: 5;
+  margin-bottom: -1rem; /* Overlap into next section */
+  border: 1px solid rgba(212, 166, 86, 0.15);
+  box-shadow: 
+    0 24px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(212, 166, 86, 0.08);
+}
+
+/* ========================================
+   ACTIVITY FEED — EDGE-BLEED (MOBILE)
+   On mobile, let the activity feed extend
+   edge-to-edge for a more immersive feel.
+   ======================================== */
+
+@media (max-width: 767px) {
+  .activity-feed,
+  [data-activity-feed] {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  /* The most recent activity item gets emphasis */
+  .activity-feed > *:first-child,
+  [data-activity-feed] > *:first-child {
+    background: rgba(16, 185, 129, 0.04);
+    border-left: 3px solid rgba(16, 185, 129, 0.5);
+    padding-left: calc(1rem - 3px);
+  }
+}
+
+/* ========================================
+   REFERRAL TABLE — FLOATING HEADER
+   The table header floats above the rows
+   with a stronger blur and shadow, creating
+   clear separation between controls and data.
+   ======================================== */
+
+.referral-table thead,
+[data-referral-table] thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   KANBAN PIPELINE — FLOW VISUALIZATION
+   Add a subtle gradient arrow between columns
+   to reinforce the left-to-right flow.
+   ======================================== */
+
+.pipeline-container,
+[data-pipeline] {
+  position: relative;
+}
+
+.pipeline-container::after,
+[data-pipeline]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  right: 5%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(100, 116, 139, 0.2) 0%,     /* submitted - slate */
+    rgba(14, 165, 233, 0.2) 30%,      /* contacted - sky */
+    rgba(245, 158, 11, 0.2) 65%,      /* quoted - amber */
+    rgba(16, 185, 129, 0.3) 100%      /* sold - emerald */
+  );
+  z-index: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+/* ========================================
+   QR CODE DRAWER — SPOTLIGHT EFFECT
+   When the QR code drawer opens, the QR code
+   should feel like the center of attention.
+   ======================================== */
+
+.qr-drawer .qr-code,
+[data-qr-code] {
+  position: relative;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 
+    0 0 60px rgba(255, 255, 255, 0.1),
+    0 0 120px rgba(212, 166, 86, 0.05);
+}
+
+/* ========================================
+   LEADERBOARD — PODIUM EFFECT (Admin View)
+   Top 3 reps by deals closed get progressively
+   more prominent visual treatment. This is
+   admin/rep-facing (customers don't see this).
+   ======================================== */
+
+.leaderboard-item:nth-child(1),
+[data-leaderboard] > *:nth-child(1) {
+  padding: 1.25rem;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 166, 86, 0.12) 0%,
+    rgba(212, 166, 86, 0.04) 100%
+  );
+  border: 1px solid rgba(212, 166, 86, 0.2);
+  border-radius: 0.75rem;
+  box-shadow: 0 0 20px rgba(212, 166, 86, 0.1);
+}
+
+.leaderboard-item:nth-child(2),
+[data-leaderboard] > *:nth-child(2) {
+  padding: 1rem;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.75rem;
+}
+
+.leaderboard-item:nth-child(3),
+[data-leaderboard] > *:nth-child(3) {
+  padding: 1rem;
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 0.75rem;
+}
+
+/* ========================================
+   SECTION SPACING — BREATHING ROOM
+   Generous vertical spacing between major
+   dashboard sections. Controlled density
+   within sections, openness between them.
+   ======================================== */
+
+.dashboard-section,
+[data-section] {
+  margin-bottom: 2.5rem;
+}
+
+.dashboard-section:last-child,
+[data-section]:last-child {
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .dashboard-section,
+  [data-section] {
+    margin-bottom: 3rem;
+  }
+}
+
+/* ========================================
+   EMPTY STATE — CENTERED SPOTLIGHT
+   Empty states should feel intentional,
+   not like broken layout.
+   ======================================== */
+
+.empty-state,
+[data-empty-state] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  text-align: center;
+  background: 
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(30, 41, 59, 0.3) 0%,
+      transparent 70%
+    );
+  border-radius: 1rem;
+  border: 1px dashed rgba(255, 255, 255, 0.06);
+}

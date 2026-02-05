@@ -1,0 +1,179 @@
+/*
+ * GUARDIAN TYPOGRAPHY UPGRADE
+ * ===========================
+ * Drop-in enhancement — import AFTER globals.css
+ * Adds: Sora display font for headlines + numbers
+ * Keeps: Geist Sans for body text (unchanged)
+ * 
+ * Installation:
+ * 1. Place this file in the project root or src/app/
+ * 2. Import in layout.tsx: import './guardian-typography-upgrade.css'
+ *    (after the globals.css import)
+ * 
+ * Alternative fonts (swap the @import URL if preferred):
+ * - Plus Jakarta Sans: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap
+ * - Outfit: https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&display=swap
+ * - Cabinet Grotesk: Use Fontshare CDN instead
+ */
+
+/* ========================================
+   FONT IMPORT
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap');
+
+/* ========================================
+   CSS VARIABLE OVERRIDE
+   ======================================== */
+
+:root {
+  --font-display: 'Sora', var(--font-sans);
+}
+
+/* ========================================
+   HEADING HIERARCHY
+   All h1-h3 get the display font.
+   h4-h6 stay in Geist Sans for contrast.
+   ======================================== */
+
+h1, h2, h3,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  font-feature-settings: 'ss01' on; /* Stylistic alternates if available */
+}
+
+h1 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+h3 {
+  font-weight: 700;
+}
+
+/* ========================================
+   EARNINGS / MONEY NUMBERS
+   The single most important visual element.
+   Applied via utility class or auto-detected.
+   ======================================== */
+
+.earnings-number,
+.stat-number,
+[data-stat-value],
+.font-display-number {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  /* Tabular nums keep columns aligned when numbers animate */
+}
+
+/* Auto-detect large numbers in stats cards */
+/* Targets elements that are likely stat values based on size */
+.text-4xl,
+.text-5xl,
+.text-6xl,
+.text-7xl {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* ========================================
+   STEP NUMBERS (How It Works)
+   Distinctive numeral treatment
+   ======================================== */
+
+.step-number,
+[data-step-number] {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+/* ========================================
+   NAVIGATION / BRAND
+   The "Guardianship" wordmark gets display font
+   ======================================== */
+
+.brand-wordmark,
+nav a:first-child,
+[data-brand] {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ========================================
+   BUTTON LABELS
+   Slightly tighter tracking on CTAs
+   ======================================== */
+
+button,
+[role="button"],
+.btn-primary,
+.btn-gold,
+.btn-orange,
+.btn-navy {
+  letter-spacing: -0.01em;
+}
+
+/* ========================================
+   BADGE / STATUS TEXT
+   Slightly wider tracking for small caps feel
+   ======================================== */
+
+.badge,
+[data-status],
+.status-badge {
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.7em;
+  font-weight: 600;
+}
+
+/* ========================================
+   GRADIENT TEXT ENHANCEMENT
+   The gold gradient text now uses the display font
+   ======================================== */
+
+.gradient-text,
+.gradient-text-emerald {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+/* ========================================
+   TABLE HEADERS
+   Slightly bolder for data table readability
+   ======================================== */
+
+th,
+[role="columnheader"] {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-size: 0.75em;
+}
+
+/* ========================================
+   RESPONSIVE SCALING
+   Larger display sizes on desktop for impact
+   ======================================== */
+
+@media (min-width: 768px) {
+  h1 {
+    letter-spacing: -0.04em;
+  }
+  
+  .earnings-number,
+  .stat-number {
+    letter-spacing: -0.04em;
+  }
+}

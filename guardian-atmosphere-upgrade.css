@@ -1,0 +1,287 @@
+/*
+ * GUARDIAN ATMOSPHERE UPGRADE
+ * ============================
+ * Drop-in enhancement — import AFTER globals.css
+ * Adds: Ambient radial gradients, layout-level noise texture,
+ *        consistent glassmorphism enforcement, depth cues
+ * 
+ * Installation:
+ * 1. Place this file in the project root or src/app/
+ * 2. Import in layout.tsx: import './guardian-atmosphere-upgrade.css'
+ *    (after globals.css and typography upgrade)
+ * 
+ * NOTE: This file uses the existing .noise-overlay pattern from globals.css
+ *       but applies it at the layout level automatically.
+ */
+
+/* ========================================
+   AMBIENT BACKGROUND GRADIENTS
+   Applied to dashboard and admin layouts.
+   Creates subtle depth without competing
+   with card content.
+   ======================================== */
+
+/* Dashboard layout ambient */
+[data-layout="dashboard"],
+.dashboard-layout,
+main:has(.dashboard-content) {
+  position: relative;
+  background: 
+    radial-gradient(
+      ellipse 60% 50% at 10% 10%,
+      rgba(30, 58, 95, 0.08) 0%,     /* Navy glow top-left */
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 50% 60% at 90% 85%,
+      rgba(16, 185, 129, 0.05) 0%,    /* Emerald glow bottom-right */
+      transparent 70%
+    ),
+    var(--background, #050508);
+}
+
+/* Admin layout ambient — slightly different placement */
+[data-layout="admin"],
+.admin-layout,
+main:has(.admin-content) {
+  position: relative;
+  background: 
+    radial-gradient(
+      ellipse 50% 40% at 80% 5%,
+      rgba(212, 166, 86, 0.04) 0%,    /* Gold hint top-right */
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 5% 90%,
+      rgba(43, 87, 151, 0.06) 0%,     /* Blue glow bottom-left */
+      transparent 70%
+    ),
+    var(--background, #050508);
+}
+
+/* ========================================
+   LAYOUT-LEVEL NOISE TEXTURE
+   Applies the noise overlay from globals.css
+   automatically to main content areas.
+   Adds subtle tactile quality to all views.
+   ======================================== */
+
+main::before,
+[data-layout]::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.018;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: overlay;
+}
+
+/* Ensure content sits above the noise layer */
+main > *,
+[data-layout] > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================================
+   SHADCN CARD GLASSMORPHISM ENFORCEMENT
+   Override Shadcn's solid --card background
+   with the existing glass-card treatment.
+   ======================================== */
+
+/* Target Shadcn Card components */
+[data-slot="card"],
+.card,
+div[class*="rounded-"][class*="border"][class*="bg-card"] {
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.75) 0%,
+    rgba(15, 23, 42, 0.4) 100%
+  ) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Lighter variant for nested cards / less prominent surfaces */
+[data-slot="card"] [data-slot="card"],
+.card .card,
+.glass-card-light {
+  background: rgba(30, 41, 59, 0.35) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   DIALOG / SHEET / POPOVER DEPTH
+   Modal surfaces should feel like they float
+   above the ambient atmosphere.
+   ======================================== */
+
+[data-slot="dialog-content"],
+[role="dialog"],
+[data-state="open"][data-side] {
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.92) 0%,
+    rgba(15, 23, 42, 0.85) 100%
+  ) !important;
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 
+    0 32px 64px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ========================================
+   SIDEBAR ATMOSPHERE
+   The admin sidebar should feel like a
+   separate depth layer, not just a dark strip.
+   ======================================== */
+
+[data-slot="sidebar"],
+aside,
+nav[class*="fixed"][class*="left"] {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.95) 0%,
+    rgba(8, 12, 21, 0.98) 100%
+  );
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   TABLE SURFACE TREATMENT
+   Data tables should feel like frosted glass
+   surfaces with subtle depth.
+   ======================================== */
+
+table,
+[role="table"],
+[data-slot="table"] {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+thead,
+[role="rowgroup"]:first-child {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ========================================
+   KANBAN PIPELINE ATMOSPHERE
+   Each column gets a subtle status-tinted glow
+   at the bottom to reinforce the pipeline flow.
+   ======================================== */
+
+.pipeline-column[data-status="submitted"],
+[data-kanban-column="submitted"] {
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(100, 116, 139, 0.05) 100%
+  );
+}
+
+.pipeline-column[data-status="contacted"],
+[data-kanban-column="contacted"] {
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(14, 165, 233, 0.05) 100%
+  );
+}
+
+.pipeline-column[data-status="quoted"],
+[data-kanban-column="quoted"] {
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(245, 158, 11, 0.05) 100%
+  );
+}
+
+.pipeline-column[data-status="sold"],
+[data-kanban-column="sold"] {
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(16, 185, 129, 0.05) 100%
+  );
+}
+
+/* ========================================
+   BOTTOM NAV ATMOSPHERE (Mobile)
+   The mobile bottom nav should feel like
+   frosted glass floating above content.
+   ======================================== */
+
+nav[class*="fixed"][class*="bottom"],
+.bottom-nav {
+  background: rgba(8, 12, 21, 0.85) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   FOCUS RING UPGRADE
+   A more visible, branded focus ring
+   that works on dark backgrounds.
+   ======================================== */
+
+*:focus-visible {
+  outline: none;
+  box-shadow: 
+    0 0 0 2px var(--background, #050508),
+    0 0 0 4px rgba(16, 185, 129, 0.5);
+}
+
+/* Gold focus ring for gold-themed elements */
+.btn-gold:focus-visible,
+.gradient-gold *:focus-visible {
+  box-shadow: 
+    0 0 0 2px var(--background, #050508),
+    0 0 0 4px rgba(212, 166, 86, 0.5);
+}
+
+/* ========================================
+   SCROLLBAR ENHANCEMENT
+   Add a slight glow to the scrollbar track
+   on hover for a premium feel.
+   ======================================== */
+
+::-webkit-scrollbar-track:hover {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(
+    180deg,
+    rgba(212, 166, 86, 0.4) 0%,
+    rgba(212, 166, 86, 0.2) 100%
+  );
+}
