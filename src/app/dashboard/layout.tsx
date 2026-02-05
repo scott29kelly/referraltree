@@ -25,6 +25,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   ExternalLink,
+  Crown,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -154,6 +155,23 @@ export default function DashboardLayout({
             })}
           </nav>
 
+          {/* Switch to Admin View - Admin users only */}
+          {rep?.role === 'admin' && (
+            <div className={clsx('py-3', isCollapsed ? 'px-2' : 'px-4')}>
+              <Link
+                href="/admin"
+                title={isCollapsed ? 'Switch to Admin View' : undefined}
+                className={clsx(
+                  'flex items-center gap-3 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 border border-slate-800/50 hover:border-slate-700/50',
+                  isCollapsed ? 'px-3 justify-center' : 'px-4'
+                )}
+              >
+                <Crown className="w-5 h-5" />
+                {!isCollapsed && <span className="text-sm font-medium">Switch to Admin View</span>}
+              </Link>
+            </div>
+          )}
+
           {/* Collapse Toggle */}
           <div className={clsx('px-4 py-2', isCollapsed && 'px-2')}>
             <button
@@ -259,6 +277,16 @@ export default function DashboardLayout({
                         <p className="text-xs text-slate-500 truncate">{rep?.email}</p>
                       </div>
                       <div className="p-2">
+                        {rep?.role === 'admin' && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setShowUserMenu(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                          >
+                            <Crown className="w-4 h-4" />
+                            <span className="text-sm">Switch to Admin View</span>
+                          </Link>
+                        )}
                         <Link
                           href="/demo"
                           onClick={() => setShowUserMenu(false)}
