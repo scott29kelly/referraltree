@@ -1,17 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn, setAuthCookie } from '@/lib/auth';
 import { Shield, Mail, Lock, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+const ROLE_EMAILS: Record<string, string> = {
+  admin: 'alex@guardian.com',
+  rep: 'sarah@guardian.com',
+};
+
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Auto-populate email based on ?role= parameter
+  useEffect(() => {
+    const role = searchParams.get('role');
+    if (role && ROLE_EMAILS[role]) {
+      setEmail(ROLE_EMAILS[role]);
+    }
+  }, [searchParams]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 

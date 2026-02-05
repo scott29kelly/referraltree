@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
+import DemoViewToggle from '@/components/ui/DemoViewToggle';
 import './globals.css';
 
 const geistSans = Geist({
@@ -71,6 +72,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-white min-h-screen`}
       >
         {children}
+        <DemoViewToggle />
         <Toaster />
       </body>
     </html>
