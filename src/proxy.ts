@@ -10,7 +10,7 @@ const adminRoutes = ['/admin'];
 // Routes that should redirect to dashboard if already authenticated
 const authRoutes = ['/login'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Get auth cookie
