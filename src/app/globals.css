@@ -160,6 +160,91 @@ body {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
+/* Premium Glassmorphism - Enhanced with gradient border */
+.glass-premium {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.6) 50%, rgba(15, 23, 42, 0.75) 100%);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.glass-premium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 166, 86, 0.4) 0%,
+    rgba(255, 255, 255, 0.15) 25%,
+    rgba(74, 144, 217, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 75%,
+    rgba(212, 166, 86, 0.3) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.3s ease-out;
+}
+
+.glass-premium:hover::before {
+  opacity: 1;
+  animation: gradient-border-shift 3s linear infinite;
+}
+
+/* Glassmorphism with animated glow effect */
+.glass-glow {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.65) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(212, 166, 86, 0.08),
+    0 0 80px rgba(74, 144, 217, 0.05);
+  animation: glass-glow-pulse 4s ease-in-out infinite;
+}
+
+/* Animated gradient border keyframe */
+@keyframes gradient-border-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Glass glow pulse animation */
+@keyframes glass-glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 40px rgba(212, 166, 86, 0.08),
+      0 0 80px rgba(74, 144, 217, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(212, 166, 86, 0.15),
+      0 0 100px rgba(74, 144, 217, 0.1);
+  }
+}
+
 /* Premium Gradient Backgrounds */
 .gradient-gold {
   background: linear-gradient(135deg, rgba(212, 166, 86, 0.15) 0%, rgba(212, 166, 86, 0.05) 100%);
