@@ -29,6 +29,7 @@ export function WalletCard({
     <Card className={clsx(
       'bg-gradient-to-br from-guardian-navy via-slate-900 to-slate-950',
       'border-guardian-gold/20 overflow-hidden relative',
+      'earnings-hero',
       className
     )}>
       {/* Background glow effect */}
@@ -57,7 +58,7 @@ export function WalletCard({
             className="flex items-center justify-center gap-1"
           >
             <DollarSign className="w-8 h-8 text-guardian-gold" />
-            <CountingNumber value={totalEarnings} className="text-5xl font-bold text-white" />
+            <CountingNumber value={totalEarnings} className="text-5xl font-bold text-white earnings-number" />
           </motion.div>
         </div>
 

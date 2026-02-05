@@ -208,6 +208,7 @@ export default function ReferralTable({
   if (referrals.length === 0) {
     return (
       <motion.div
+        data-referral-table
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -225,6 +226,7 @@ export default function ReferralTable({
 
   return (
     <motion.div
+      data-referral-table
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}

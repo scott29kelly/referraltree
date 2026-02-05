@@ -86,7 +86,7 @@ export default function DashboardPage() {
       {/* Header with Quick Action */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-white font-display">
             Good {getGreeting()}, {rep?.name?.split(' ')[0]}!
           </h1>
           <p className="text-slate-400 mt-1">
@@ -114,7 +114,7 @@ export default function DashboardPage() {
       />
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stats-grid">
         <StatsCard
           title="Total Referrals"
           value={stats?.total_referrals || 0}

@@ -89,7 +89,7 @@ export function PipelineKanban({
   };
 
   return (
-    <div className={clsx('space-y-4', className)}>
+    <div data-pipeline className={clsx('space-y-4', className)}>
       {/* Desktop: Full Kanban */}
       <div className="hidden lg:grid lg:grid-cols-4 gap-4">
         {columns.map((column) => {
@@ -97,6 +97,7 @@ export function PipelineKanban({
           return (
             <div
               key={column.id}
+              data-kanban-column={column.id}
               className={clsx(
                 'rounded-xl border p-4',
                 column.borderColor,
@@ -164,6 +165,7 @@ export function PipelineKanban({
           return (
             <div
               key={column.id}
+              data-kanban-column={column.id}
               className={clsx(
                 'rounded-xl border overflow-hidden transition-all',
                 column.borderColor,

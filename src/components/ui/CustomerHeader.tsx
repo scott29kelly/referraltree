@@ -23,7 +23,7 @@ export default function CustomerHeader({ className }: CustomerHeaderProps) {
           {/* Logo */}
           <Link href="/demo" className="flex items-center gap-2">
             <GuardianIcon size="sm" variant="gold" />
-            <span className="font-bold text-white">Guardianship</span>
+            <span className="font-bold text-white font-display">Guardianship</span>
           </Link>
 
           {/* Desktop Nav */}
