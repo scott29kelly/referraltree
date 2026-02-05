@@ -2,16 +2,24 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Crown, Users, Eye, ChevronDown, ArrowLeftRight } from 'lucide-react';
+import { Crown, Users, Eye, ChevronDown, ArrowLeftRight, Loader2 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { signIn, signOut, setAuthCookie, clearAuthCookie } from '@/lib/auth';
 
 type ViewMode = 'customer' | 'rep' | 'admin';
 
 const views: { mode: ViewMode; label: string; icon: typeof Crown; color: string; href: string }[] = [
   { mode: 'customer', label: 'Customer', icon: Eye, color: 'text-sky-400', href: '/demo' },
-  { mode: 'rep', label: 'Rep', icon: Users, color: 'text-guardian-gold', href: '/login?role=rep' },
-  { mode: 'admin', label: 'Admin', icon: Crown, color: 'text-emerald-400', href: '/login?role=admin' },
+  { mode: 'rep', label: 'Rep', icon: Users, color: 'text-guardian-gold', href: '/dashboard' },
+  { mode: 'admin', label: 'Admin', icon: Crown, color: 'text-emerald-400', href: '/admin' },
 ];
+
+// Demo accounts for seamless view switching
+const DEMO_EMAILS: Record<ViewMode, string> = {
+  customer: '',
+  rep: 'sarah@guardian.com',
+  admin: 'alex@guardian.com',
+};
 
 function getCurrentView(pathname: string): ViewMode {
   if (pathname.startsWith('/admin')) return 'admin';
@@ -23,6 +31,7 @@ export default function DemoViewToggle() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const currentView = getCurrentView(pathname);
   const current = views.find((v) => v.mode === currentView)!;
@@ -45,25 +54,39 @@ export default function DemoViewToggle() {
     setOpen(false);
   }, [pathname]);
 
-  const handleSwitch = (view: typeof views[number]) => {
+  const handleSwitch = async (view: typeof views[number]) => {
     setOpen(false);
     if (view.mode === currentView) return;
 
+    // Customer view: just navigate, no auth needed
     if (view.mode === 'customer') {
       router.push('/demo');
-    } else if (view.mode === 'rep') {
-      // If already authenticated, go directly; otherwise go to login
-      if (currentView === 'admin') {
-        router.push('/dashboard');
+      return;
+    }
+
+    // Switching to rep or admin: sign out, then auto-sign-in as the correct demo user
+    setSwitching(true);
+    try {
+      // Clear current session
+      await signOut();
+      clearAuthCookie();
+
+      // Auto-sign-in as the target demo user
+      const email = DEMO_EMAILS[view.mode];
+      const result = await signIn(email, 'demo');
+
+      if (result.success && result.rep) {
+        setAuthCookie(result.rep.id, result.rep.role);
+        router.push(view.href);
       } else {
-        router.push('/login?role=rep');
+        // Fallback: send to login page with role hint
+        router.push(`/login?role=${view.mode}`);
       }
-    } else if (view.mode === 'admin') {
-      if (currentView === 'rep') {
-        router.push('/admin');
-      } else {
-        router.push('/login?role=admin');
-      }
+    } catch (error) {
+      console.error('Failed to switch view:', error);
+      router.push(`/login?role=${view.mode}`);
+    } finally {
+      setSwitching(false);
     }
   };
 
@@ -73,15 +96,21 @@ export default function DemoViewToggle() {
   return (
     <div ref={ref} className="fixed top-3 right-3 z-[100]">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => !switching && setOpen(!open)}
+        disabled={switching}
         className={clsx(
           'flex items-center gap-2 px-3 py-2 rounded-xl',
           'bg-slate-800/90 backdrop-blur-xl border border-slate-700/50',
           'hover:bg-slate-700/90 transition-all duration-200',
-          'shadow-lg shadow-black/20'
+          'shadow-lg shadow-black/20',
+          switching && 'opacity-80 cursor-wait'
         )}
       >
-        <ArrowLeftRight className="w-3.5 h-3.5 text-slate-400" />
+        {switching ? (
+          <Loader2 className="w-3.5 h-3.5 text-slate-400 animate-spin" />
+        ) : (
+          <ArrowLeftRight className="w-3.5 h-3.5 text-slate-400" />
+        )}
         <current.icon className={clsx('w-4 h-4', current.color)} />
         <span className="text-sm font-medium text-white hidden sm:inline">{current.label}</span>
         <ChevronDown className={clsx('w-3.5 h-3.5 text-slate-400 transition-transform', open && 'rotate-180')} />
