@@ -56,8 +56,12 @@ export default function ReferralsPage() {
   useEffect(() => {
     if (rep) {
       loadData();
+    } else if (!authLoading) {
+      // Auth finished but no rep available - stop loading to avoid
+      // permanently stuck loading skeleton
+      setLoading(false);
     }
-  }, [rep, loadData]);
+  }, [rep, authLoading, loadData]);
 
   const handleStatusChange = async (id: string, status: ReferralStatus) => {
     // Optimistically update UI
