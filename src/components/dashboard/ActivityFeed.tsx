@@ -89,7 +89,8 @@ const iconVariants = {
 export default function ActivityFeed({ activities, className }: ActivityFeedProps) {
   if (activities.length === 0) {
     return (
-      <motion.div 
+      <motion.div
+        data-activity-feed
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -102,13 +103,14 @@ export default function ActivityFeed({ activities, className }: ActivityFeedProp
   }
 
   return (
-    <motion.div 
+    <motion.div
+      data-activity-feed
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className={clsx('rounded-xl bg-slate-800/50 border border-slate-700/50 p-6', className)}
     >
-      <motion.h3 
+      <motion.h3
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="text-lg font-semibold text-white mb-4"

@@ -83,7 +83,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div data-layout="admin" className="min-h-screen bg-slate-950 flex">
       {/* Sidebar - Desktop Only */}
       <aside
         className={clsx(
@@ -105,7 +105,7 @@ export default function AdminLayout({
             </div>
             {!isCollapsed && (
               <div className="overflow-hidden">
-                <h1 className="font-bold text-white tracking-tight">Guardianship</h1>
+                <h1 className="font-bold text-white tracking-tight font-display">Guardianship</h1>
                 <div className="flex items-center gap-1.5">
                   <Crown className="w-3 h-3 text-emerald-400" />
                   <p className="text-xs text-emerald-400 font-medium">Admin Panel</p>
