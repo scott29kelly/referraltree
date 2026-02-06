@@ -6,10 +6,10 @@
 /* Guardian Brand Theme - Premium 2026 Edition */
 @theme inline {
   /* Brand Colors - Guardian Storm Repair Official Palette */
-  --color-guardian-navy: #1E3A5F;       /* Primary navy blue (headers, buttons) */
-  --color-guardian-blue: #2B5797;       /* Secondary blue (accents) */
-  --color-guardian-lightBlue: #4A90D9;  /* Light blue accent */
-  --color-guardian-gold: #D4A656;       /* Gold accent (highlights, badges) */
+  --color-guardian-navy: #032E4A;       /* Primary navy blue (headers, buttons) */
+  --color-guardian-blue: #005780;       /* Secondary blue (accents) */
+  --color-guardian-lightBlue: #85CFF4;  /* Light blue accent */
+  --color-guardian-gold: #F49D00;       /* Gold accent (highlights, badges) */
   --color-guardian-orange: #E67E22;     /* Orange (CTAs, urgent actions) */
   --color-guardian-green: #2D5A3D;      /* Success/sold status */
 
@@ -113,8 +113,8 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(212, 166, 86, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(212, 166, 86, 0.5); }
+  0%, 100% { box-shadow: 0 0 20px rgba(244, 157, 0, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(244, 157, 0, 0.5); }
 }
 
 @keyframes float {
@@ -162,7 +162,7 @@ body {
 
 /* Premium Gradient Backgrounds */
 .gradient-gold {
-  background: linear-gradient(135deg, rgba(212, 166, 86, 0.15) 0%, rgba(212, 166, 86, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(244, 157, 0, 0.15) 0%, rgba(244, 157, 0, 0.05) 100%);
 }
 
 .gradient-emerald {
@@ -182,7 +182,7 @@ body {
 }
 
 .gradient-navy {
-  background: linear-gradient(135deg, rgba(30, 58, 95, 0.15) 0%, rgba(30, 58, 95, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(3, 46, 74, 0.15) 0%, rgba(3, 46, 74, 0.05) 100%);
 }
 
 /* Shimmer Effect */
@@ -204,7 +204,7 @@ body {
 
 /* Glow Effects */
 .glow-gold {
-  box-shadow: 0 0 20px rgba(212, 166, 86, 0.25), 0 0 40px rgba(212, 166, 86, 0.1);
+  box-shadow: 0 0 20px rgba(244, 157, 0, 0.25), 0 0 40px rgba(244, 157, 0, 0.1);
 }
 
 .glow-emerald {
@@ -220,7 +220,7 @@ body {
 }
 
 .glow-navy {
-  box-shadow: 0 0 20px rgba(30, 58, 95, 0.25), 0 0 40px rgba(30, 58, 95, 0.1);
+  box-shadow: 0 0 20px rgba(3, 46, 74, 0.25), 0 0 40px rgba(3, 46, 74, 0.1);
 }
 
 /* Premium Button Styles */
@@ -236,13 +236,13 @@ body {
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, #D4A656 0%, #B8923D 100%);
-  box-shadow: 0 4px 14px 0 rgba(212, 166, 86, 0.3);
+  background: linear-gradient(135deg, #F49D00 0%, #C47F00 100%);
+  box-shadow: 0 4px 14px 0 rgba(244, 157, 0, 0.3);
   transition: all 0.3s ease-out;
 }
 
 .btn-gold:hover {
-  box-shadow: 0 6px 20px 0 rgba(212, 166, 86, 0.4);
+  box-shadow: 0 6px 20px 0 rgba(244, 157, 0, 0.4);
   transform: translateY(-2px);
 }
 
@@ -258,13 +258,13 @@ body {
 }
 
 .btn-navy {
-  background: linear-gradient(135deg, #2B5797 0%, #1E3A5F 100%);
-  box-shadow: 0 4px 14px 0 rgba(30, 58, 95, 0.3);
+  background: linear-gradient(135deg, #005780 0%, #032E4A 100%);
+  box-shadow: 0 4px 14px 0 rgba(3, 46, 74, 0.3);
   transition: all 0.3s ease-out;
 }
 
 .btn-navy:hover {
-  box-shadow: 0 6px 20px 0 rgba(30, 58, 95, 0.4);
+  box-shadow: 0 6px 20px 0 rgba(3, 46, 74, 0.4);
   transform: translateY(-2px);
 }
 
@@ -396,7 +396,7 @@ body {
 
 /* Selection colors */
 ::selection {
-  background: rgba(212, 166, 86, 0.35);
+  background: rgba(244, 157, 0, 0.35);
   color: #fff;
 }
 
@@ -445,7 +445,7 @@ textarea:focus {
 
 /* Gradient Text */
 .gradient-text {
-  background: linear-gradient(135deg, #D4A656 0%, #F0D68A 50%, #D4A656 100%);
+  background: linear-gradient(135deg, #F49D00 0%, #FFD060 50%, #F49D00 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -484,7 +484,7 @@ textarea:focus {
 
 /* Progress bar gradient fills */
 .progress-gradient-gold {
-  background: linear-gradient(90deg, #B8923D 0%, #D4A656 50%, #F0D68A 100%);
+  background: linear-gradient(90deg, #C47F00 0%, #F49D00 50%, #FFD060 100%);
 }
 
 .progress-gradient-emerald {
@@ -542,7 +542,7 @@ textarea:focus {
   
   /* Chart colors - Guardian themed */
   --chart-1: #10b981;
-  --chart-2: #D4A656;
+  --chart-2: #F49D00;
   --chart-3: #0ea5e9;
   --chart-4: #f59e0b;
   --chart-5: #8b5cf6;

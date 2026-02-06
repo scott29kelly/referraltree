@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Smartphone, Users, DollarSign, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { GuardianLogo } from '@/components/ui/guardian-logo';
 
 export default function DemoPage() {
   const [showQRSimulation, setShowQRSimulation] = useState(false);
@@ -17,6 +18,16 @@ export default function DemoPage() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
 
         <div className="relative max-w-4xl mx-auto px-6 py-16 text-center">
+          {/* Logo */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', duration: 0.8 }}
+            className="inline-block mb-8"
+          >
+            <GuardianLogo size="lg" variant="gold" showText />
+          </motion.div>
+
           {/* Headline */}
           <motion.h2
             initial={{ opacity: 0, y: 20 }}

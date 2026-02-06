@@ -285,9 +285,7 @@ export default function DashboardLayout({
 
         {/* Page Content */}
         <main className="flex-1 p-4 lg:p-6 pb-24 lg:pb-6 overflow-auto">
-          <div className="max-w-7xl mx-auto w-full">
-            <PageTransition>{children}</PageTransition>
-          </div>
+          <PageTransition>{children}</PageTransition>
         </main>
 
         {/* PWA Install Prompt */}
