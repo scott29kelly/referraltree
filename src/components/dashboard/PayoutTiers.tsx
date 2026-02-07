@@ -55,14 +55,14 @@ export function PayoutTiers({
             angle: 60,
             spread: 55,
             origin: { x: 0 },
-            colors: ['#D4A656', '#E67E22', '#10b981'],
+            colors: ['#F49D00', '#E67E22', '#10b981'],
           });
           confetti({
             particleCount: 2,
             angle: 120,
             spread: 55,
             origin: { x: 1 },
-            colors: ['#D4A656', '#E67E22', '#10b981'],
+            colors: ['#F49D00', '#E67E22', '#10b981'],
           });
 
           if (Date.now() < end) {
@@ -335,7 +335,7 @@ function TierCard({
       <p className="text-xs text-slate-500 mb-1">Level {level}</p>
       <p
         className={cn(
-          'text-xl font-bold',
+          'text-xl font-bold earnings-number',
           isActive ? (isHighlighted ? 'text-guardian-gold' : 'text-emerald-400') : 'text-slate-500'
         )}
       >

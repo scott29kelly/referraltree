@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Smartphone, Users, DollarSign, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import CustomerHeader from '@/components/ui/CustomerHeader';
 import { GuardianLogo } from '@/components/ui/guardian-logo';
 
 export default function DemoPage() {
@@ -12,10 +11,8 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-guardian-navy/30 to-slate-950">
-      <CustomerHeader />
-
       {/* Hero Section */}
-      <div className="relative overflow-hidden pt-16">
+      <div className="relative overflow-hidden pt-8">
         {/* Background gradient orbs */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-guardian-gold/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
@@ -236,7 +233,7 @@ function FeatureCard({
       className={`p-6 rounded-xl border ${colorClasses[color]}`}
     >
       <Icon className="w-8 h-8 mb-4" />
-      <h4 className="font-semibold text-white mb-2">{title}</h4>
+      <h4 className="font-semibold text-white mb-2 font-display">{title}</h4>
       <p className="text-sm text-slate-400">{description}</p>
     </motion.div>
   );

@@ -9,12 +9,12 @@ interface GuardianLogoProps {
   className?: string;
 }
 
-const sizeClasses = {
-  xs: 'w-6 h-6',
-  sm: 'w-8 h-8',
-  md: 'w-10 h-10',
-  lg: 'w-14 h-14',
-  xl: 'w-20 h-20',
+const sizeMap = {
+  xs: 24,
+  sm: 32,
+  md: 40,
+  lg: 56,
+  xl: 80,
 };
 
 const textSizeClasses = {
@@ -25,19 +25,118 @@ const textSizeClasses = {
   xl: 'text-2xl',
 };
 
-const variantClasses = {
-  default: 'bg-gradient-to-br from-guardian-gold to-guardian-orange',
-  gold: 'bg-gradient-to-br from-guardian-gold to-amber-600',
-  white: 'bg-white',
-  navy: 'bg-gradient-to-br from-guardian-navy to-guardian-blue',
+// Font sizes for the "G" letter inside the shield, in viewBox units
+const letterSizeMap = {
+  xs: 30,
+  sm: 30,
+  md: 30,
+  lg: 30,
+  xl: 30,
 };
 
-const letterColors = {
-  default: 'text-white',
-  gold: 'text-guardian-navy',
-  white: 'text-guardian-navy',
-  navy: 'text-white',
+type Variant = 'default' | 'gold' | 'white' | 'navy';
+
+interface VariantConfig {
+  gradientStops: [string, string];
+  stroke: string;
+  letterFill: string;
+  glow: boolean;
+}
+
+const variantConfigs: Record<Variant, VariantConfig> = {
+  default: {
+    gradientStops: ['#005780', '#032E4A'],
+    stroke: '#F49D00',
+    letterFill: '#FFFFFF',
+    glow: true,
+  },
+  navy: {
+    gradientStops: ['#005780', '#032E4A'],
+    stroke: '#F49D00',
+    letterFill: '#FFFFFF',
+    glow: true,
+  },
+  gold: {
+    gradientStops: ['#F49D00', '#C47F00'],
+    stroke: '#032E4A',
+    letterFill: '#032E4A',
+    glow: true,
+  },
+  white: {
+    gradientStops: ['#FFFFFF', '#FFFFFF'],
+    stroke: '#94a3b8',
+    letterFill: '#032E4A',
+    glow: false,
+  },
 };
+
+function ShieldSvg({
+  width,
+  variant,
+  id,
+}: {
+  width: number;
+  variant: Variant;
+  id: string;
+}) {
+  const config = variantConfigs[variant];
+  // viewBox is 60x72, height is proportional
+  const height = Math.round(width * (72 / 60));
+
+  const glowFilter =
+    config.glow
+      ? variant === 'gold'
+        ? 'drop-shadow(0 2px 6px rgba(244, 157, 0, 0.4))'
+        : 'drop-shadow(0 2px 6px rgba(244, 157, 0, 0.3))'
+      : undefined;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 60 72"
+      width={width}
+      height={height}
+      style={{ filter: glowFilter }}
+      className="flex-shrink-0"
+    >
+      <defs>
+        <linearGradient id={`shield-fill-${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={config.gradientStops[0]} />
+          <stop offset="100%" stopColor={config.gradientStops[1]} />
+        </linearGradient>
+      </defs>
+      {/* Shield path — heraldic crest: wide rounded top, tapers to pointed bottom */}
+      <path
+        d="M30 3
+           C30 3 5 10 5 10
+           Q3 10 3 12
+           L3 32
+           C3 50 30 69 30 69
+           C30 69 57 50 57 32
+           L57 12
+           Q57 10 55 10
+           C55 10 30 3 30 3Z"
+        fill={`url(#shield-fill-${id})`}
+        stroke={config.stroke}
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+      />
+      {/* "G" letter */}
+      <text
+        x="30"
+        y="38"
+        fontFamily="system-ui, -apple-system, sans-serif"
+        fontSize="30"
+        fontWeight="bold"
+        fill={config.letterFill}
+        textAnchor="middle"
+        dominantBaseline="central"
+      >
+        G
+      </text>
+    </svg>
+  );
+}
 
 export function GuardianLogo({
   size = 'md',
@@ -45,35 +144,21 @@ export function GuardianLogo({
   showText = false,
   className,
 }: GuardianLogoProps) {
+  const width = sizeMap[size];
+  // Use a stable id suffix based on variant + size
+  const id = `logo-${variant}-${size}`;
+
   return (
-    <div className={cn('flex items-center gap-2', className)}>
-      <div
-        className={cn(
-          'flex items-center justify-center rounded-xl shadow-lg',
-          sizeClasses[size],
-          variantClasses[variant],
-          variant === 'default' && 'shadow-guardian-gold/30',
-          variant === 'gold' && 'shadow-guardian-gold/30',
-          variant === 'navy' && 'shadow-guardian-navy/30'
-        )}
-      >
-        <span
-          className={cn(
-            'font-bold',
-            letterColors[variant],
-            size === 'xs' && 'text-sm',
-            size === 'sm' && 'text-lg',
-            size === 'md' && 'text-xl',
-            size === 'lg' && 'text-2xl',
-            size === 'xl' && 'text-3xl'
-          )}
-        >
-          G
-        </span>
-      </div>
+    <div className={cn('flex items-center gap-3', className)}>
+      <ShieldSvg width={width} variant={variant} id={id} />
       {showText && (
         <div className="flex flex-col">
-          <span className={cn('font-bold text-white', textSizeClasses[size])}>
+          <span
+            className={cn(
+              'font-bold text-white font-display',
+              textSizeClasses[size]
+            )}
+          >
             Guardianship
           </span>
           <span className="text-xs text-slate-400">Referral Program</span>
@@ -89,31 +174,12 @@ export function GuardianIcon({
   variant = 'default',
   className,
 }: Omit<GuardianLogoProps, 'showText'>) {
+  const width = sizeMap[size];
+  const id = `icon-${variant}-${size}`;
+
   return (
-    <div
-      className={cn(
-        'flex items-center justify-center rounded-xl shadow-lg',
-        sizeClasses[size],
-        variantClasses[variant],
-        variant === 'default' && 'shadow-guardian-gold/30',
-        variant === 'gold' && 'shadow-guardian-gold/30',
-        variant === 'navy' && 'shadow-guardian-navy/30',
-        className
-      )}
-    >
-      <span
-        className={cn(
-          'font-bold',
-          letterColors[variant],
-          size === 'xs' && 'text-sm',
-          size === 'sm' && 'text-lg',
-          size === 'md' && 'text-xl',
-          size === 'lg' && 'text-2xl',
-          size === 'xl' && 'text-3xl'
-        )}
-      >
-        G
-      </span>
+    <div className={cn('inline-flex', className)}>
+      <ShieldSvg width={width} variant={variant} id={id} />
     </div>
   );
 }

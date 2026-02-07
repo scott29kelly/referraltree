@@ -133,7 +133,7 @@ export default function RepCard({
           </div>
           <div>
             <p className="text-xs font-medium text-slate-400">Referrals</p>
-            <p className="font-bold text-white text-lg">{rep.total_referrals}</p>
+            <p className="font-bold text-white text-lg stat-number">{rep.total_referrals}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 p-3.5 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/10">
@@ -142,7 +142,7 @@ export default function RepCard({
           </div>
           <div>
             <p className="text-xs font-medium text-slate-400">Earnings</p>
-            <p className="font-bold text-white text-lg">
+            <p className="font-bold text-white text-lg earnings-number">
               ${rep.total_earnings.toLocaleString()}
             </p>
           </div>

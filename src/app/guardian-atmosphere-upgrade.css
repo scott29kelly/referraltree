@@ -29,7 +29,7 @@ main:has(.dashboard-content) {
   background: 
     radial-gradient(
       ellipse 60% 50% at 10% 10%,
-      rgba(30, 58, 95, 0.08) 0%,     /* Navy glow top-left */
+      rgba(3, 46, 74, 0.08) 0%,     /* Navy glow top-left */
       transparent 70%
     ),
     radial-gradient(
@@ -48,12 +48,12 @@ main:has(.admin-content) {
   background: 
     radial-gradient(
       ellipse 50% 40% at 80% 5%,
-      rgba(212, 166, 86, 0.04) 0%,    /* Gold hint top-right */
+      rgba(244, 157, 0, 0.04) 0%,    /* Gold hint top-right */
       transparent 70%
     ),
     radial-gradient(
       ellipse 60% 50% at 5% 90%,
-      rgba(43, 87, 151, 0.06) 0%,     /* Blue glow bottom-left */
+      rgba(0, 87, 128, 0.06) 0%,     /* Blue glow bottom-left */
       transparent 70%
     ),
     var(--background, #050508);
@@ -265,7 +265,7 @@ nav[class*="fixed"][class*="bottom"],
 .gradient-gold *:focus-visible {
   box-shadow: 
     0 0 0 2px var(--background, #050508),
-    0 0 0 4px rgba(212, 166, 86, 0.5);
+    0 0 0 4px rgba(244, 157, 0, 0.5);
 }
 
 /* ========================================
@@ -281,7 +281,7 @@ nav[class*="fixed"][class*="bottom"],
 ::-webkit-scrollbar-thumb:active {
   background: linear-gradient(
     180deg,
-    rgba(212, 166, 86, 0.4) 0%,
-    rgba(212, 166, 86, 0.2) 100%
+    rgba(244, 157, 0, 0.4) 0%,
+    rgba(244, 157, 0, 0.2) 100%
   );
 }

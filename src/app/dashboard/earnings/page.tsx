@@ -69,10 +69,10 @@ export default function EarningsPage() {
       </div>
 
       {/* Big Earnings Display */}
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-guardian-gold/20 to-guardian-gold/5 border border-guardian-gold/30">
+      <div className="p-6 rounded-2xl bg-gradient-to-br from-guardian-gold/20 to-guardian-gold/5 border border-guardian-gold/30 earnings-hero">
         <p className="text-sm text-guardian-gold mb-2">Total Earned</p>
         <div className="flex items-baseline gap-2">
-          <span className="text-5xl lg:text-6xl font-bold text-white">
+          <span className="text-5xl lg:text-6xl font-bold text-white earnings-number">
             ${totalEarned.toLocaleString()}
           </span>
           <span className="text-lg text-guardian-gold/70">USD</span>
@@ -146,7 +146,7 @@ export default function EarningsPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-guardian-gold">
+                  <p className="font-semibold text-guardian-gold earnings-number">
                     ${referral.value}
                   </p>
                   <p className="text-xs text-slate-500">

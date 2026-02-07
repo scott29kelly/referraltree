@@ -164,7 +164,7 @@ export default function StatsCard({
               >
                 {title}
               </motion.p>
-              <p className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
+              <p className="text-2xl lg:text-3xl font-bold text-white tracking-tight stat-number">
                 <AnimatedValue value={value} />
               </p>
               {subtitle && (

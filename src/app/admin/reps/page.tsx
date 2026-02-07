@@ -100,21 +100,21 @@ export default function RepsPage() {
             </div>
             <div>
               <p className="text-sm text-slate-400">Total Reps</p>
-              <p className="text-xl font-bold text-white">{reps.length}</p>
+              <p className="text-xl font-bold text-white stat-number">{reps.length}</p>
             </div>
           </div>
         </div>
         <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
           <p className="text-sm text-slate-400">Active</p>
-          <p className="text-xl font-bold text-emerald-400">{activeCount}</p>
+          <p className="text-xl font-bold text-emerald-400 stat-number">{activeCount}</p>
         </div>
         <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
           <p className="text-sm text-slate-400">Total Referrals</p>
-          <p className="text-xl font-bold text-white">{totalReferrals}</p>
+          <p className="text-xl font-bold text-white stat-number">{totalReferrals}</p>
         </div>
         <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
           <p className="text-sm text-slate-400">Total Earnings</p>
-          <p className="text-xl font-bold text-guardian-gold">
+          <p className="text-xl font-bold text-guardian-gold earnings-number">
             ${totalEarnings.toLocaleString()}
           </p>
         </div>

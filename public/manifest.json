@@ -4,8 +4,8 @@
   "description": "Track your referrals and earn $250 for every closed deal with Guardian Storm Repair.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1E3A5F",
-  "theme_color": "#1E3A5F",
+  "background_color": "#032E4A",
+  "theme_color": "#032E4A",
   "orientation": "portrait-primary",
   "icons": [
     {

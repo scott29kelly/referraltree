@@ -69,7 +69,7 @@ export function WalletCard({
               <Clock className="w-4 h-4 text-amber-400" />
               <span className="text-xs text-slate-400">Pending</span>
             </div>
-            <p className="text-xl font-bold text-amber-400">
+            <p className="text-xl font-bold text-amber-400 earnings-number">
               ${pendingEarnings.toLocaleString()}
             </p>
           </div>
@@ -78,7 +78,7 @@ export function WalletCard({
               <CheckCircle className="w-4 h-4 text-emerald-400" />
               <span className="text-xs text-slate-400">Paid Out</span>
             </div>
-            <p className="text-xl font-bold text-emerald-400">
+            <p className="text-xl font-bold text-emerald-400 earnings-number">
               ${paidOut.toLocaleString()}
             </p>
           </div>

@@ -237,7 +237,7 @@ export default function ReferralSubmissionPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-guardian-gold/20 to-guardian-gold/5 border border-guardian-gold/30 mb-4">
             <Shield className="w-8 h-8 text-guardian-gold" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Guardian Storm Repair</h1>
+          <h1 className="text-2xl font-bold text-white brand-wordmark">Guardian Storm Repair</h1>
           <p className="text-slate-400 mt-2">
             Referred by <span className="text-guardian-gold font-medium">{rep.name}</span>
           </p>
@@ -249,7 +249,7 @@ export default function ReferralSubmissionPage() {
             <div key={s} className="flex items-center">
               <div
                 className={clsx(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all',
+                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all step-number',
                   s === step
                     ? 'bg-guardian-gold text-slate-900'
                     : s < step

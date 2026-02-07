@@ -69,7 +69,7 @@
     135deg,
     #10b981 0%,
     #34d399 40%,
-    #D4A656 100%
+    #F49D00 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -173,10 +173,10 @@
   position: relative;
   z-index: 5;
   margin-bottom: -1rem; /* Overlap into next section */
-  border: 1px solid rgba(212, 166, 86, 0.15);
+  border: 1px solid rgba(244, 157, 0, 0.15);
   box-shadow: 
     0 24px 48px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(212, 166, 86, 0.08);
+    0 0 0 1px rgba(244, 157, 0, 0.08);
 }
 
 /* ========================================
@@ -267,7 +267,7 @@
   border-radius: 1rem;
   box-shadow: 
     0 0 60px rgba(255, 255, 255, 0.1),
-    0 0 120px rgba(212, 166, 86, 0.05);
+    0 0 120px rgba(244, 157, 0, 0.05);
 }
 
 /* ========================================
@@ -282,12 +282,12 @@
   padding: 1.25rem;
   background: linear-gradient(
     135deg,
-    rgba(212, 166, 86, 0.12) 0%,
-    rgba(212, 166, 86, 0.04) 100%
+    rgba(244, 157, 0, 0.12) 0%,
+    rgba(244, 157, 0, 0.04) 100%
   );
-  border: 1px solid rgba(212, 166, 86, 0.2);
+  border: 1px solid rgba(244, 157, 0, 0.2);
   border-radius: 0.75rem;
-  box-shadow: 0 0 20px rgba(212, 166, 86, 0.1);
+  box-shadow: 0 0 20px rgba(244, 157, 0, 0.1);
 }
 
 .leaderboard-item:nth-child(2),
