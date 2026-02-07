@@ -375,7 +375,7 @@ function TreePageInner() {
             </div>
             <div>
               <p className="text-sm text-emerald-300/70">Total Earned</p>
-              <p className="text-3xl font-bold text-emerald-400">${stats.totalEarnings.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-emerald-400 earnings-number">${stats.totalEarnings.toLocaleString()}</p>
             </div>
           </motion.div>
         </div>
@@ -408,7 +408,7 @@ function TreePageInner() {
                 stat.color === 'emerald' && 'text-emerald-400',
                 stat.color === 'amber' && 'text-amber-400',
               )} />
-              <p className="text-2xl font-bold text-white">{stat.value}</p>
+              <p className="text-2xl font-bold text-white stat-number">{stat.value}</p>
               <p className="text-xs text-slate-400">{stat.label}</p>
             </motion.div>
           ))}

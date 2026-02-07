@@ -212,25 +212,25 @@ export default function QRCodePage() {
             </h3>
             <ol className="space-y-3 text-sm text-slate-300">
               <li className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-guardian-gold/20 text-guardian-gold flex items-center justify-center flex-shrink-0 text-xs font-semibold">
+                <span className="w-6 h-6 rounded-full bg-guardian-gold/20 text-guardian-gold flex items-center justify-center flex-shrink-0 text-xs font-semibold step-number">
                   1
                 </span>
                 <span>Download the QR code or copy the link</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-guardian-gold/20 text-guardian-gold flex items-center justify-center flex-shrink-0 text-xs font-semibold">
+                <span className="w-6 h-6 rounded-full bg-guardian-gold/20 text-guardian-gold flex items-center justify-center flex-shrink-0 text-xs font-semibold step-number">
                   2
                 </span>
                 <span>Share with customers who need storm repair services</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-guardian-gold/20 text-guardian-gold flex items-center justify-center flex-shrink-0 text-xs font-semibold">
+                <span className="w-6 h-6 rounded-full bg-guardian-gold/20 text-guardian-gold flex items-center justify-center flex-shrink-0 text-xs font-semibold step-number">
                   3
                 </span>
                 <span>When they submit, you&apos;ll see the referral in your dashboard</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-guardian-gold/20 text-guardian-gold flex items-center justify-center flex-shrink-0 text-xs font-semibold">
+                <span className="w-6 h-6 rounded-full bg-guardian-gold/20 text-guardian-gold flex items-center justify-center flex-shrink-0 text-xs font-semibold step-number">
                   4
                 </span>
                 <span>Earn $125 for every referral that closes!</span>

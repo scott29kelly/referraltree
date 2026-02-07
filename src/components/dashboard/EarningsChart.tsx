@@ -159,13 +159,13 @@ export default function EarningsChart({ referrals, className }: EarningsChartPro
       <div className="mt-6 pt-6 border-t border-slate-700/40 grid grid-cols-2 gap-6">
         <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/10">
           <p className="text-sm font-medium text-slate-400 mb-1">Total Earned</p>
-          <p className="text-2xl font-bold text-emerald-400">
+          <p className="text-2xl font-bold text-emerald-400 earnings-number">
             ${totalEarned.toLocaleString()}
           </p>
         </div>
         <div className="p-4 rounded-xl bg-gradient-to-br from-slate-700/30 to-slate-700/10 border border-slate-600/20">
           <p className="text-sm font-medium text-slate-400 mb-1">Total Pending</p>
-          <p className="text-2xl font-bold text-slate-300">
+          <p className="text-2xl font-bold text-slate-300 earnings-number">
             ${totalPending.toLocaleString()}
           </p>
         </div>

@@ -68,7 +68,7 @@ export default function LoginForm() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-guardian-navy mb-4">
             <Shield className="w-8 h-8 text-guardian-gold" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Guardianship</h1>
+          <h1 className="text-2xl font-bold text-white brand-wordmark">Guardianship</h1>
           <p className="text-slate-400 mt-2">Sign in to your account</p>
         </div>
 

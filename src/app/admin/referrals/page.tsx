@@ -689,7 +689,7 @@ function AdminReferralsPageInner() {
                       </select>
                     </td>
                     <td className="px-4 py-4">
-                      <span className="text-guardian-gold font-semibold">
+                      <span className="text-guardian-gold font-semibold earnings-number">
                         ${referral.value}
                       </span>
                     </td>

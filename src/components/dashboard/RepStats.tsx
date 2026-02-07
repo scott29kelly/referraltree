@@ -54,15 +54,15 @@ export function RepStats({ stats, className }: RepStatsProps) {
 
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-emerald-400">${stats.totalEarnings.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-emerald-400 earnings-number">${stats.totalEarnings.toLocaleString()}</p>
             <p className="text-xs text-slate-400 mt-1">Total Earned</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-amber-400">${stats.pendingEarnings.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-amber-400 earnings-number">${stats.pendingEarnings.toLocaleString()}</p>
             <p className="text-xs text-slate-400 mt-1">Pending</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-sky-400">${(stats.pendingEarnings + stats.totalEarnings).toLocaleString()}</p>
+            <p className="text-2xl font-bold text-sky-400 earnings-number">${(stats.pendingEarnings + stats.totalEarnings).toLocaleString()}</p>
             <p className="text-xs text-slate-400 mt-1">Projected</p>
           </div>
         </div>
@@ -158,7 +158,7 @@ function PipelineStat({
         <Icon className="w-4 h-4" />
         <span className="text-xs uppercase tracking-wider">{label}</span>
       </div>
-      <p className="text-2xl font-bold text-white">{value}</p>
+      <p className="text-2xl font-bold text-white stat-number">{value}</p>
     </div>
   );
 }

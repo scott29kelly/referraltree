@@ -302,7 +302,7 @@ function LeaderboardRow({ rep, rank, isCurrentUser, index }: LeaderboardRowProps
 
       {/* Revenue */}
       <div className="col-span-2 text-right">
-        <span className="font-semibold text-emerald-400">${rep.revenue.toLocaleString()}</span>
+        <span className="font-semibold text-emerald-400 earnings-number">${rep.revenue.toLocaleString()}</span>
       </div>
 
       {/* Trend */}
@@ -349,7 +349,7 @@ export function LeaderboardCompact({
             <p className="font-medium text-white text-sm truncate">{rep.name}</p>
             <p className="text-xs text-slate-400">{rep.closedDeals} closed</p>
           </div>
-          <span className="text-emerald-400 font-semibold text-sm">
+          <span className="text-emerald-400 font-semibold text-sm earnings-number">
             ${rep.revenue.toLocaleString()}
           </span>
         </div>

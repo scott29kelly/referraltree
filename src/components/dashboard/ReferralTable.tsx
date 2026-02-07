@@ -420,7 +420,7 @@ export default function ReferralTable({
                         </motion.span>
                       )}
                     </td>
-                    <td className="px-5 py-4 text-guardian-gold font-bold">
+                    <td className="px-5 py-4 text-guardian-gold font-bold earnings-number">
                       ${referral.value}
                     </td>
                     <td className="px-5 py-4 text-slate-400 text-sm">

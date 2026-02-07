@@ -233,7 +233,7 @@ function FeatureCard({
       className={`p-6 rounded-xl border ${colorClasses[color]}`}
     >
       <Icon className="w-8 h-8 mb-4" />
-      <h4 className="font-semibold text-white mb-2">{title}</h4>
+      <h4 className="font-semibold text-white mb-2 font-display">{title}</h4>
       <p className="text-sm text-slate-400">{description}</p>
     </motion.div>
   );

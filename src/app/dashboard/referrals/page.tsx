@@ -121,31 +121,31 @@ export default function ReferralsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
           <p className="text-sm text-slate-400">Submitted</p>
-          <p className="text-2xl font-bold text-slate-300">
+          <p className="text-2xl font-bold text-slate-300 stat-number">
             {referrals.filter((r) => r.status === 'submitted').length}
           </p>
         </div>
         <div className="p-4 rounded-xl bg-sky-500/10 border border-sky-500/20">
           <p className="text-sm text-slate-400">Contacted</p>
-          <p className="text-2xl font-bold text-sky-400">
+          <p className="text-2xl font-bold text-sky-400 stat-number">
             {referrals.filter((r) => r.status === 'contacted').length}
           </p>
         </div>
         <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
           <p className="text-sm text-slate-400">Quoted</p>
-          <p className="text-2xl font-bold text-amber-400">
+          <p className="text-2xl font-bold text-amber-400 stat-number">
             {referrals.filter((r) => r.status === 'quoted').length}
           </p>
         </div>
         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
           <p className="text-sm text-slate-400">Sold</p>
-          <p className="text-2xl font-bold text-emerald-400">
+          <p className="text-2xl font-bold text-emerald-400 stat-number">
             {referrals.filter((r) => r.status === 'sold').length}
           </p>
         </div>
         <div className="p-4 rounded-xl bg-guardian-gold/10 border border-guardian-gold/20">
           <p className="text-sm text-slate-400">Total Earnings</p>
-          <p className="text-2xl font-bold text-guardian-gold">
+          <p className="text-2xl font-bold text-guardian-gold earnings-number">
             ${(referrals.filter((r) => r.status === 'sold').length * 125).toLocaleString()}
           </p>
         </div>

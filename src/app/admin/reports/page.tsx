@@ -347,7 +347,7 @@ export default function ReportsPage() {
                         : 0}
                       %
                     </td>
-                    <td className="px-5 py-4 text-guardian-gold font-semibold">
+                    <td className="px-5 py-4 text-guardian-gold font-semibold earnings-number">
                       ${rep.total_earnings.toLocaleString()}
                     </td>
                   </tr>

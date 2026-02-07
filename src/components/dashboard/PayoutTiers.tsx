@@ -335,7 +335,7 @@ function TierCard({
       <p className="text-xs text-slate-500 mb-1">Level {level}</p>
       <p
         className={cn(
-          'text-xl font-bold',
+          'text-xl font-bold earnings-number',
           isActive ? (isHighlighted ? 'text-guardian-gold' : 'text-emerald-400') : 'text-slate-500'
         )}
       >
