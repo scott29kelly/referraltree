@@ -65,18 +65,18 @@ export default function QRCodePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
+      <div data-section>
         <h1 className="text-2xl font-bold text-white">Your QR Code</h1>
         <p className="text-slate-400 mt-1">
           Share this code with customers to track their referrals
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div data-section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* QR Code Display */}
         <div className="rounded-2xl bg-guardian-navy border border-guardian-gold/20 p-6 lg:p-8 flex flex-col items-center">
           <div className="w-full max-w-xs">
-            <div className="bg-white rounded-xl p-4 mb-6">
+            <div data-qr-code className="bg-white rounded-xl p-4 mb-6">
               {referralLink ? (
                 <img
                   src={generateQRCode(referralLink, 300)}

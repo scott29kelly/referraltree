@@ -84,7 +84,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header with Quick Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div data-section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white font-display">
             Good {getGreeting()}, {rep?.name?.split(' ')[0]}!
@@ -106,15 +106,17 @@ export default function DashboardPage() {
       </div>
 
       {/* Wallet Card - Hero Section */}
+      <div data-section>
       <WalletCard
         totalEarnings={totalEarnings}
         pendingEarnings={pendingEarnings}
         paidOut={paidOut}
         nextMilestone={125}
       />
+      </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stats-grid">
+      <div data-section className="grid grid-cols-2 lg:grid-cols-4 gap-4 stats-grid">
         <StatsCard
           title="Total Referrals"
           value={stats?.total_referrals || 0}
@@ -144,7 +146,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div data-section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           href="/dashboard/tree"
           className="flex items-center gap-4 p-5 rounded-xl bg-gradient-to-br from-emerald-900/30 to-emerald-950/50 border border-emerald-500/20 hover:border-emerald-500/40 transition-all group"
@@ -175,7 +177,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Activity & Recent Referrals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div data-section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ActivityFeed activities={activities} />
 
         <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 p-6">

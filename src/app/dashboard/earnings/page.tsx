@@ -63,13 +63,13 @@ export default function EarningsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
+      <div data-section>
         <h1 className="text-2xl font-bold text-white">Earnings</h1>
         <p className="text-slate-400 mt-1">Track your referral earnings</p>
       </div>
 
       {/* Big Earnings Display */}
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-guardian-gold/20 to-guardian-gold/5 border border-guardian-gold/30 earnings-hero">
+      <div data-section className="p-6 rounded-2xl bg-gradient-to-br from-guardian-gold/20 to-guardian-gold/5 border border-guardian-gold/30 earnings-hero">
         <p className="text-sm text-guardian-gold mb-2">Total Earned</p>
         <div className="flex items-baseline gap-2">
           <span className="text-5xl lg:text-6xl font-bold text-white earnings-number">
@@ -83,7 +83,7 @@ export default function EarningsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div data-section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Earned"
           value={`$${totalEarned.toLocaleString()}`}
@@ -112,10 +112,12 @@ export default function EarningsPage() {
       </div>
 
       {/* Chart */}
+      <div data-section>
       <EarningsChart referrals={referrals} />
+      </div>
 
       {/* Sold Referrals List */}
-      <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 overflow-hidden">
+      <div data-section className="rounded-xl bg-slate-800/50 border border-slate-700/50 overflow-hidden">
         <div className="p-4 border-b border-slate-700/50">
           <h3 className="text-lg font-semibold text-white">Sold Referrals</h3>
           <p className="text-sm text-slate-400">Your successful closings</p>

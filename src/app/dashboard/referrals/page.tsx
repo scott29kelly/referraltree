@@ -110,7 +110,7 @@ export default function ReferralsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
+      <div data-section>
         <h1 className="text-2xl font-bold text-white">Referrals</h1>
         <p className="text-slate-400 mt-1">
           Manage and track your referral pipeline
@@ -118,7 +118,7 @@ export default function ReferralsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div data-section className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
           <p className="text-sm text-slate-400">Submitted</p>
           <p className="text-2xl font-bold text-slate-300 stat-number">
@@ -152,12 +152,14 @@ export default function ReferralsPage() {
       </div>
 
       {/* Table */}
+      <div data-section>
       <ReferralTable
         referrals={referrals}
         onStatusChange={handleStatusChange}
         showCustomer
         customerNames={customerNames}
       />
+      </div>
     </div>
   );
 }

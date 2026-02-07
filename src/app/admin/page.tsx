@@ -102,13 +102,13 @@ export default function AdminHomePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
+      <div data-section>
         <h1 className="text-2xl font-bold text-white font-display">Admin Overview</h1>
         <p className="text-slate-400 mt-1">Company-wide performance metrics</p>
       </div>
 
       {/* Company Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stats-grid">
+      <div data-section className="grid grid-cols-2 lg:grid-cols-4 gap-4 stats-grid">
         <StatsCard
           title="Total Referrals"
           value={stats?.total_referrals || 0}
@@ -137,7 +137,7 @@ export default function AdminHomePage() {
       </div>
 
       {/* Pipeline Kanban */}
-      <div className="space-y-4">
+      <div data-section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
             <Kanban className="w-5 h-5 text-emerald-400" />
@@ -158,7 +158,7 @@ export default function AdminHomePage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div data-section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           href="/admin/reps"
           className="flex items-center gap-4 p-5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-emerald-500/30 transition-all group"
@@ -193,6 +193,7 @@ export default function AdminHomePage() {
       </div>
 
       {/* Leaderboard - Full Width */}
+      <div data-section>
       <Leaderboard
         data={topReps.map((rep): RepLeaderboardData => ({
           id: rep.id,
@@ -206,9 +207,12 @@ export default function AdminHomePage() {
         }))}
         showAll
       />
+      </div>
 
       {/* Activity Feed */}
+      <div data-section>
       <ActivityFeed activities={activities} />
+      </div>
     </div>
   );
 }

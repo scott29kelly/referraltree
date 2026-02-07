@@ -186,6 +186,7 @@ export function EmptyState({
 
   return (
     <FadeIn
+      data-empty-state
       className={cn(
         'flex flex-col items-center justify-center text-center py-12 px-6',
         className

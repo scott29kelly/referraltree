@@ -29,7 +29,7 @@ export function WalletCard({
     <Card className={clsx(
       'bg-gradient-to-br from-guardian-navy via-slate-900 to-slate-950',
       'border-guardian-gold/20 overflow-hidden relative',
-      'earnings-hero',
+      'earnings-hero wallet-card',
       className
     )}>
       {/* Background glow effect */}
